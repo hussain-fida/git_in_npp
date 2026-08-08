@@ -1,160 +1,776 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <commands>
-	
+    
+    <!-- ============================================ -->
+    <!-- SETUP & INITIALIZATION                       -->
+    <!-- ============================================ -->
+    
     <item>
         <command>git init</command>
-        <tagq>init, start, begin, repo</tagq>
-        <desc>Initialized empty Git repository in /path/to/my-project-name/.git/</desc>
-        <alt> </alt>
+        <tagq>init, start, begin, repo, initialize</tagq>
+        <desc>init : Initialize a new Git repository in current directory</desc>
+        <alt>git init --bare (for bare repository)</alt>
         <warning>None (Safe read-only command)</warning>
-        <next>git config --global user.name "Your Full Name" \n git config --global user.email "your.email@example.com"</next>
+        <next>git config --global user.name "Your Name"</next>
     </item>
-	
-	
-	<item>
+    
+    <item>
         <command>git config --global user.name "&lt;msg&gt;"</command>
-        <tagq>config, global, user, name</tagq>
-        <desc>Set your name (this will be attached to your commits):</desc>
-        <alt> </alt>
-        <warning>May override existing user </warning>
-        <next>git config --global user.email "your.email@example.com"</next>
+        <tagq>config, global, user, name, setup</tagq>
+        <desc>config : Set your global username for all commits</desc>
+        <alt>git config user.name "Name" (local only)</alt>
+        <warning>Overrides existing global username</warning>
+        <next>git config --global user.email "&lt;msg&gt;"</next>
     </item>
-	
-	
-	<item>
-        <command>git remote add origin "&lt;github&gt;"</command>
-        <tagq>remote, origin, github, link</tagq>
-        <desc>Connect Local Repo to GitHub:</desc>
-        <alt> </alt>
-        <warning>May override existing user </warning>
-        <next>git config --global user.email "your.email@example.com"</next>
+    
+    <item>
+        <command>git config --global user.email "&lt;msg&gt;"</command>
+        <tagq>config, global, user, email, setup</tagq>
+        <desc>config : Set your global email for all commits</desc>
+        <alt>git config user.email "email" (local only)</alt>
+        <warning>Overrides existing global email</warning>
+        <next>git config --global core.editor "code --wait"</next>
     </item>
-	
-	
-	<!-- Basic / Status -->
+    
+    <item>
+        <command>git config --global core.editor "&lt;msg&gt;"</command>
+        <tagq>config, editor, setup, default</tagq>
+        <desc>config : Set default text editor for Git (e.g., code --wait, vim, nano)</desc>
+        <alt>git config core.editor "vim" (local only)</alt>
+        <warning>None</warning>
+        <next>git config --list</next>
+    </item>
+    
+    <item>
+        <command>git config --list</command>
+        <tagq>config, list, settings, show, view</tagq>
+        <desc>config : Display all current Git configuration settings</desc>
+        <alt>git config --global --list (global only)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git config --global user.name</next>
+    </item>
+    
+    <item>
+        <command>git clone &lt;github&gt;</command>
+        <tagq>clone, download, copy, repo, github</tagq>
+        <desc>clone : Clone a remote repository to your local machine</desc>
+        <alt>git clone --depth 1 &lt;url&gt; (shallow clone)</alt>
+        <warning>Downloads all files; ensure you have enough disk space</warning>
+        <next>cd &lt;repo-name&gt; &amp;&amp; git status</next>
+    </item>
+    
+    <item>
+        <command>git remote add origin &lt;github&gt;</command>
+        <tagq>remote, origin, github, link, connect</tagq>
+        <desc>remote : Connect local repository to remote GitHub repository</desc>
+        <alt>git remote add upstream &lt;url&gt; (add another remote)</alt>
+        <warning>Will show error if remote already exists</warning>
+        <next>git push -u origin main</next>
+    </item>
+    
+    <item>
+        <command>git remote -v</command>
+        <tagq>remote, list, show, view, url</tagq>
+        <desc>remote : List all configured remote repositories with URLs</desc>
+        <alt>git remote (show only names)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git remote remove origin</next>
+    </item>
+    
+    <item>
+        <command>git remote remove origin</command>
+        <tagq>remote, remove, delete, disconnect</tagq>
+        <desc>remote : Remove a remote repository connection</desc>
+        <alt>git remote rm origin (alternative syntax)</alt>
+        <warning>Only removes connection, doesn't delete remote repo</warning>
+        <next>git remote add origin &lt;url&gt;</next>
+    </item>
+
+    <!-- ============================================ -->
+    <!-- BASIC STATUS & DIFF                          -->
+    <!-- ============================================ -->
+    
     <item>
         <command>git status</command>
         <tagq>status, check, info, state, diff</tagq>
-        <desc>Check repository status (working tree &amp; staging area)</desc>
-        <alt>git status -s (for compact view)</alt>
+        <desc>status : Show current repository status (modified/staged/untracked files)</desc>
+        <alt>git status -s (compact view)</alt>
         <warning>None (Safe read-only command)</warning>
         <next>git add . or git diff</next>
     </item>
-	
-	<item>
+    
+    <item>
         <command>git status -s</command>
-        <tagq>status, check, info, state, diff</tagq>
-        <desc>Check repository status (working tree &amp; staging area) compact view</desc>
-        <alt>git status</alt>
+        <tagq>status, check, info, state, compact, short</tagq>
+        <desc>status : Show compact repository status with symbols (?? = untracked, M = modified)</desc>
+        <alt>git status --short</alt>
         <warning>None (Safe read-only command)</warning>
         <next>git add . or git diff</next>
     </item>
-	
-	
+    
     <item>
         <command>git diff</command>
-        <tagq>diff, changes, compare, modified</tagq>
-        <desc>Show unstaged changes in working directory</desc>
-        <alt>git diff --staged (for staged changes)</alt>
+        <tagq>diff, changes, compare, modified, unstaged</tagq>
+        <desc>diff : Show unstaged changes in working directory</desc>
+        <alt>git diff --staged (show staged changes)</alt>
         <warning>None (Read-only)</warning>
-        <next>git add .</next>
+        <next>git add . or git diff --staged</next>
+    </item>
+    
+    <item>
+        <command>git diff --staged</command>
+        <tagq>diff, staged, changes, compare, cached</tagq>
+        <desc>diff : Show changes that are staged for commit</desc>
+        <alt>git diff --cached</alt>
+        <warning>None (Read-only)</warning>
+        <next>git commit -m "&lt;msg&gt;"</next>
+    </item>
+    
+    <item>
+        <command>git diff &lt;branch&gt;..&lt;branch&gt;</command>
+        <tagq>diff, branch, compare, between</tagq>
+        <desc>diff : Show differences between two branches (e.g., main..develop)</desc>
+        <alt>git diff &lt;branch1&gt;...&lt;branch2&gt; (3-dot comparison)</alt>
+        <warning>None</warning>
+        <next>git merge &lt;branch&gt;</next>
     </item>
 
-
-
-    <!-- Staging & Committing -->
+    <!-- ============================================ -->
+    <!-- STAGING & COMMITTING                         -->
+    <!-- ============================================ -->
+    
     <item>
         <command>git add .</command>
-        <tagq>add, stage, all, track, tag1</tagq>
-        <desc>Stage all modified and new files for commit</desc>
-        <alt>git add "$(FILE_NAME)" (stage current active file only)</alt>
-        <warning>Be careful not to stage untracked temporary files</warning>
-        <next>git commit -m "Your commit message"</next>
+        <tagq>add, stage, all, track, staging</tagq>
+        <desc>add : Stage all modified and new files in current directory</desc>
+        <alt>git add -A (stage all files in entire repo)</alt>
+        <warning>Be careful not to stage temporary or sensitive files</warning>
+        <next>git commit -m "&lt;msg&gt;"</next>
     </item>
-	
+    
     <item>
-		<command>git commit -m "&lt;msg&gt;"</command>
-		<tagq>commit, save, record, message</tagq>
-		<desc>Commit staged changes with a custom message</desc>
-		<alt>git commit --amend --no-edit</alt>
-		<warning>Requires staged changes first</warning>
-		<next>git push origin main</next>
-	</item>
-
+        <command>git add &lt;msg&gt;</command>
+        <tagq>add, stage, file, specific, track</tagq>
+        <desc>add : Stage a specific file for commit (e.g., git add index.html)</desc>
+        <alt>git add *.txt (stage all txt files)</alt>
+        <warning>None</warning>
+        <next>git commit -m "&lt;msg&gt;"</next>
+    </item>
+    
+    <item>
+        <command>git add -p</command>
+        <tagq>add, patch, interactive, partial, stage</tagq>
+        <desc>add : Stage changes interactively (hunk by hunk) - great for splitting commits</desc>
+        <alt>git add --patch</alt>
+        <warning>Requires careful review of each hunk</warning>
+        <next>git commit -m "&lt;msg&gt;"</next>
+    </item>
+    
+    <item>
+        <command>git commit -m "&lt;msg&gt;"</command>
+        <tagq>commit, save, record, message</tagq>
+        <desc>commit : Commit staged changes with a custom message</desc>
+        <alt>git commit -am "&lt;msg&gt;" (stage and commit all tracked files)</alt>
+        <warning>Requires staged changes first</warning>
+        <next>git push origin main</next>
+    </item>
+    
+    <item>
+        <command>git commit -am "&lt;msg&gt;"</command>
+        <tagq>commit, save, record, all, auto-stage</tagq>
+        <desc>commit : Stage all tracked files AND commit with one command</desc>
+        <alt>git add . &amp;&amp; git commit -m "&lt;msg&gt;"</alt>
+        <warning>Only stages already tracked files, not new files</warning>
+        <next>git push origin main</next>
+    </item>
+    
+    <item>
+        <command>git commit --amend -m "&lt;msg&gt;"</command>
+        <tagq>commit, amend, fix, edit, update, last</tagq>
+        <desc>commit : Replace the last commit with a new one (different message)</desc>
+        <alt>git commit --amend --no-edit (keep same message)</alt>
+        <warning>DANGER: Don't use if commit already pushed!</warning>
+        <next>git push --force-with-lease</next>
+    </item>
+    
     <item>
         <command>git commit --amend --no-edit</command>
-        <tagq>commit, amend, fix, edit, update</tagq>
-        <desc>Combine staged changes into the most recent commit without changing message</desc>
-        <alt>git commit --amend -m "new message"</alt>
-        <warning>Do NOT use if the commit has already been pushed to remote</warning>
-        <next>git push --force-with-lease (if already pushed)</next>
+        <tagq>commit, amend, fix, edit, update, last, keep</tagq>
+        <desc>commit : Combine staged changes into last commit without changing message</desc>
+        <alt>git commit --amend -m "&lt;msg&gt;"</alt>
+        <warning>DANGER: Don't use if commit already pushed!</warning>
+        <next>git push --force-with-lease</next>
     </item>
 
-    <!-- Branching & Checkout -->
+    <!-- ============================================ -->
+    <!-- BRANCHING & CHECKOUT                         -->
+    <!-- ============================================ -->
+    
+    <item>
+        <command>git branch</command>
+        <tagq>branch, list, local, show</tagq>
+        <desc>branch : List all local branches (* indicates current branch)</desc>
+        <alt>git branch -a (show all remote branches too)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git checkout &lt;branch&gt;</next>
+    </item>
+    
     <item>
         <command>git branch -a</command>
-        <tagq>branch, list, remote, local</tagq>
-        <desc>List all local and remote branches</desc>
-        <alt>git branch (local branches only)</alt>
+        <tagq>branch, list, remote, local, all</tagq>
+        <desc>branch : List all local and remote branches</desc>
+        <alt>git branch -r (remote branches only)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git checkout -b &lt;branch&gt;</next>
+    </item>
+    
+    <item>
+        <command>git branch &lt;branch&gt;</command>
+        <tagq>branch, create, new</tagq>
+        <desc>branch : Create a new branch (but don't switch to it)</desc>
+        <alt>git checkout -b &lt;branch&gt; (create and switch)</alt>
         <warning>None</warning>
-        <next>git checkout &lt;branch-name&gt;</next>
+        <next>git checkout &lt;branch&gt;</next>
     </item>
-	
+    
     <item>
-        <command>git checkout -b feature-branch</command>
-        <tagq>branch, checkout, create, new, switch</tagq>
-        <desc>Create and switch to a new local branch</desc>
-        <alt>git switch -c feature-branch</alt>
-        <warning>Ensure current working directory is clean before switching</warning>
+        <command>git checkout &lt;branch&gt;</command>
+        <tagq>checkout, switch, branch, navigate</tagq>
+        <desc>checkout : Switch to an existing branch</desc>
+        <alt>git switch &lt;branch&gt; (newer syntax)</alt>
+        <warning>Commit or stash changes before switching</warning>
         <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git checkout -b &lt;branch&gt;</command>
+        <tagq>checkout, branch, create, new, switch</tagq>
+        <desc>checkout : Create and switch to a new branch in one command</desc>
+        <alt>git switch -c &lt;branch&gt;</alt>
+        <warning>Ensure working directory is clean before switching</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git switch &lt;branch&gt;</command>
+        <tagq>switch, branch, navigate, move</tagq>
+        <desc>switch : Switch to an existing branch (newer Git syntax)</desc>
+        <alt>git checkout &lt;branch&gt; (older syntax)</alt>
+        <warning>Commit or stash changes before switching</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git switch -c &lt;branch&gt;</command>
+        <tagq>switch, create, new, branch</tagq>
+        <desc>switch : Create and switch to new branch (newer Git syntax)</desc>
+        <alt>git checkout -b &lt;branch&gt;</alt>
+        <warning>None</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git branch -d &lt;branch&gt;</command>
+        <tagq>branch, delete, remove, safe</tagq>
+        <desc>branch : Delete a branch (safe - only if merged)</desc>
+        <alt>git branch -D &lt;branch&gt; (force delete)</alt>
+        <warning>Will fail if branch has unmerged changes</warning>
+        <next>git branch</next>
+    </item>
+    
+    <item>
+        <command>git branch -D &lt;branch&gt;</command>
+        <tagq>branch, delete, remove, force</tagq>
+        <desc>branch : Force delete a branch (even if not merged)</desc>
+        <alt>git branch -d &lt;branch&gt; (safe version)</alt>
+        <warning>WARNING: Changes in this branch may be lost forever!</warning>
+        <next>git branch</next>
     </item>
 
-    <!-- Remote & Synchronizing -->
+    <!-- ============================================ -->
+    <!-- MERGING & REBASING                           -->
+    <!-- ============================================ -->
+    
     <item>
-        <command>git push origin main</command>
-        <tagq>push, remote, upload, github, hub, tag1</tagq>
-        <desc>Push local commits to remote main branch</desc>
-        <alt>git push -u origin &lt;branch-name&gt;</alt>
-        <warning>May fail if remote contains commits you do not have locally</warning>
+        <command>git merge &lt;branch&gt;</command>
+        <tagq>merge, combine, integrate, branch</tagq>
+        <desc>merge : Merge changes from another branch into current branch</desc>
+        <alt>git merge --no-ff &lt;branch&gt; (force merge commit)</alt>
+        <warning>May create merge conflicts that need resolution</warning>
         <next>git status</next>
     </item>
-	
+    
     <item>
-        <command>git pull origin main</command>
+        <command>git merge --abort</command>
+        <tagq>merge, abort, cancel, stop</tagq>
+        <desc>merge : Cancel an in-progress merge and restore pre-merge state</desc>
+        <alt>git reset --merge (alternative)</alt>
+        <warning>Only use when merge is in progress</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git rebase &lt;branch&gt;</command>
+        <tagq>rebase, reorganize, history, branch</tagq>
+        <desc>rebase : Reapply commits on top of another branch (cleaner history)</desc>
+        <alt>git rebase -i HEAD~3 (interactive rebase)</alt>
+        <warning>DANGER: Don't rebase public/remote branches!</warning>
+        <next>git rebase --continue or --abort</next>
+    </item>
+    
+    <item>
+        <command>git rebase -i HEAD~&lt;msg&gt;</command>
+        <tagq>rebase, interactive, history, squash, edit</tagq>
+        <desc>rebase : Interactive rebase to squash, reorder, or edit last N commits (replace N with number)</desc>
+        <alt>git rebase -i &lt;hash&gt; (rebase from specific commit)</alt>
+        <warning>DANGER: Only use on local commits before pushing!</warning>
+        <next>git push --force-with-lease</next>
+    </item>
+
+    <!-- ============================================ -->
+    <!-- REMOTE & SYNC                                -->
+    <!-- ============================================ -->
+    
+    <item>
+        <command>git push origin &lt;branch&gt;</command>
+        <tagq>push, remote, upload, github, hub</tagq>
+        <desc>push : Push local commits to remote branch</desc>
+        <alt>git push -u origin &lt;branch&gt; (set upstream)</alt>
+        <warning>Will fail if remote has new commits you don't have</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git push -u origin &lt;branch&gt;</command>
+        <tagq>push, remote, upload, upstream, set, first</tagq>
+        <desc>push : Push and set upstream tracking for new branch (first push)</desc>
+        <alt>git push --set-upstream origin &lt;branch&gt;</alt>
+        <warning>None for first push of new branch</warning>
+        <next>git push origin &lt;branch&gt;</next>
+    </item>
+    
+    <item>
+        <command>git push --force-with-lease</command>
+        <tagq>push, force, override, update, remote</tagq>
+        <desc>push : Force push (safe version) - only if remote hasn't changed</desc>
+        <alt>git push -f (force, but dangerous)</alt>
+        <warning>USE WITH CAUTION - Overwrites remote history!</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git pull origin &lt;branch&gt;</command>
         <tagq>pull, fetch, merge, sync, update</tagq>
-        <desc>Fetch and merge changes from remote main branch</desc>
-        <alt>git pull --rebase origin main</alt>
-        <warning>May cause merge conflicts if local files overlap with remote changes</warning>
+        <desc>pull : Fetch and merge remote changes into current branch</desc>
+        <alt>git pull --rebase origin &lt;branch&gt; (rebase instead of merge)</alt>
+        <warning>May cause merge conflicts</warning>
         <next>git status</next>
     </item>
-
-    <!-- Undoing & Reverting -->
+    
     <item>
-        <command>git checkout -- "$(FILE_NAME)"</command>
+        <command>git pull --rebase origin &lt;branch&gt;</command>
+        <tagq>pull, rebase, fetch, sync, update, cleaner</tagq>
+        <desc>pull : Pull with rebase for cleaner linear history</desc>
+        <alt>git pull origin &lt;branch&gt; (merge version)</alt>
+        <warning>May cause conflicts during rebase</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git fetch</command>
+        <tagq>fetch, download, remote, update</tagq>
+        <desc>fetch : Download objects and refs from remote without merging</desc>
+        <alt>git fetch --all (fetch from all remotes)</alt>
+        <warning>None (Safe read-only command)</warning>
+        <next>git merge origin/main or git status</next>
+    </item>
+    
+    <item>
+        <command>git fetch --all</command>
+        <tagq>fetch, all, remotes, update</tagq>
+        <desc>fetch : Fetch updates from all remote repositories</desc>
+        <alt>git remote update</alt>
+        <warning>None</warning>
+        <next>git merge origin/main</next>
+    </item>
+
+    <!-- ============================================ -->
+    <!-- UNDOING & REVERTING                          -->
+    <!-- ============================================ -->
+    
+    <item>
+        <command>git checkout -- &lt;msg&gt;</command>
         <tagq>revert, discard, checkout, restore, file</tagq>
-        <desc>Discard local unstaged changes in the current active file</desc>
-        <alt>git restore "$(FILE_NAME)"</alt>
+        <desc>checkout : Discard local unstaged changes in specific file (e.g., git checkout -- index.html)</desc>
+        <alt>git restore &lt;file&gt; (newer syntax)</alt>
         <warning>RISKY: Unstaged changes in this file will be permanently lost!</warning>
         <next>git status</next>
     </item>
-	
+    
+    <item>
+        <command>git restore &lt;msg&gt;</command>
+        <tagq>restore, revert, discard, file, reset</tagq>
+        <desc>restore : Discard local unstaged changes in specific file (newer Git)</desc>
+        <alt>git checkout -- &lt;file&gt;</alt>
+        <warning>RISKY: Changes in this file will be permanently lost!</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git reset HEAD &lt;msg&gt;</command>
+        <tagq>reset, unstage, file, undo</tagq>
+        <desc>reset : Unstage a specific file but keep changes in working directory</desc>
+        <alt>git restore --staged &lt;file&gt;</alt>
+        <warning>Only removes from staging, doesn't delete changes</warning>
+        <next>git status</next>
+    </item>
+    
     <item>
         <command>git reset HEAD~1 --soft</command>
-        <tagq>reset, undo, commit, soft</tagq>
-        <desc>Undo last commit but keep modified files staged</desc>
-        <alt>git reset HEAD~1 (keeps modifications unstaged)</alt>
+        <tagq>reset, undo, commit, soft, keep</tagq>
+        <desc>reset : Undo last commit but keep changes staged</desc>
+        <alt>git reset --soft HEAD~1</alt>
         <warning>Modifies commit history</warning>
         <next>git status</next>
     </item>
+    
+    <item>
+        <command>git reset HEAD~1</command>
+        <tagq>reset, undo, commit, mixed, default</tagq>
+        <desc>reset : Undo last commit but keep changes unstaged (default)</desc>
+        <alt>git reset --mixed HEAD~1</alt>
+        <warning>Modifies commit history</warning>
+        <next>git add . &amp;&amp; git commit -m "&lt;msg&gt;"</next>
+    </item>
+    
+    <item>
+        <command>git reset HEAD~1 --hard</command>
+        <tagq>reset, undo, commit, hard, delete</tagq>
+        <desc>reset : UNDO last commit AND DELETE all changes - PERMANENT!</desc>
+        <alt>git reset --hard HEAD~1</alt>
+        <warning>DANGER: All changes from last commit are permanently lost!</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git revert &lt;hash&gt;</command>
+        <tagq>revert, undo, commit, safe, public</tagq>
+        <desc>revert : Create new commit that undoes a previous commit (safe for public branches)</desc>
+        <alt>git revert HEAD~1 (revert last commit)</alt>
+        <warning>Creates new commit - safe for already pushed commits</warning>
+        <next>git push origin main</next>
+    </item>
 
-    <!-- Logs & History -->
+    <!-- ============================================ -->
+    <!-- LOGS & HISTORY                               -->
+    <!-- ============================================ -->
+    
+    <item>
+        <command>git log</command>
+        <tagq>log, history, commits, list</tagq>
+        <desc>log : Show full commit history</desc>
+        <alt>git log --oneline (compact view)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git log --oneline --graph</next>
+    </item>
+    
+    <item>
+        <command>git log --oneline</command>
+        <tagq>log, history, commits, compact, short</tagq>
+        <desc>log : Show compact commit history with short hashes</desc>
+        <alt>git log --oneline -n 10 (limit to 10 commits)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git log --oneline --graph</next>
+    </item>
+    
     <item>
         <command>git log --oneline --graph --all -n 15</command>
-        <tagq>log, history, graph, tree, visual</tagq>
-        <desc>Show concise commit history with branch graph (last 15 commits)</desc>
-        <alt>git log -n 5</alt>
-        <warning>None</warning>
-        <next>git show &lt;commit-hash&gt;</next>
+        <tagq>log, history, graph, tree, visual, branches</tagq>
+        <desc>log : Show commit history with branch visualization (last 15 commits)</desc>
+        <alt>git log --oneline --graph --all (all commits)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git show &lt;hash&gt;</next>
     </item>
-	
+    
+    <item>
+        <command>git show &lt;hash&gt;</command>
+        <tagq>show, view, commit, details, hash</tagq>
+        <desc>show : Show detailed information about a specific commit</desc>
+        <alt>git show HEAD (latest commit)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git diff &lt;hash&gt;^..&lt;hash&gt;</next>
+    </item>
+    
+    <item>
+        <command>git blame &lt;msg&gt;</command>
+        <tagq>blame, who, author, line, file</tagq>
+        <desc>blame : Show who last modified each line of a file (e.g., git blame index.html)</desc>
+        <alt>git blame -L 10,20 &lt;file&gt; (specific lines)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git log --follow &lt;msg&gt;</next>
+    </item>
+    
+    <item>
+        <command>git log --follow &lt;msg&gt;</command>
+        <tagq>log, follow, file, history, tracking</tagq>
+        <desc>log : Show commit history for a specific file (including renames)</desc>
+        <alt>git log -p &lt;file&gt; (show diff for each commit)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git blame &lt;msg&gt;</next>
+    </item>
+
+    <!-- ============================================ -->
+    <!-- STASHING                                     -->
+    <!-- ============================================ -->
+    
+    <item>
+        <command>git stash</command>
+        <tagq>stash, save, temporary, uncommitted, hide</tagq>
+        <desc>stash : Save uncommitted changes to stash (to switch branches)</desc>
+        <alt>git stash save "&lt;msg&gt;" (with custom message)</alt>
+        <warning>Changes are saved but removed from working directory</warning>
+        <next>git checkout &lt;branch&gt; or git stash pop</next>
+    </item>
+    
+    <item>
+        <command>git stash save "&lt;msg&gt;"</command>
+        <tagq>stash, save, message, named, custom</tagq>
+        <desc>stash : Save uncommitted changes with a descriptive message</desc>
+        <alt>git stash (without message)</alt>
+        <warning>Changes are saved but removed from working directory</warning>
+        <next>git stash list</next>
+    </item>
+    
+    <item>
+        <command>git stash list</command>
+        <tagq>stash, list, show, saved</tagq>
+        <desc>stash : List all stashed changes</desc>
+        <alt>git stash show -p (show stash content)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git stash pop</next>
+    </item>
+    
+    <item>
+        <command>git stash pop</command>
+        <tagq>stash, pop, apply, restore, latest</tagq>
+        <desc>stash : Apply latest stash and remove it from stash list</desc>
+        <alt>git stash apply (keep in stash)</alt>
+        <warning>May cause merge conflicts if files have changed</warning>
+        <next>git stash drop (if pop fails)</next>
+    </item>
+    
+    <item>
+        <command>git stash apply</command>
+        <tagq>stash, apply, restore, keep</tagq>
+        <desc>stash : Apply latest stash but keep it in stash list</desc>
+        <alt>git stash apply stash@{1} (specific stash)</alt>
+        <warning>May cause merge conflicts</warning>
+        <next>git stash drop</next>
+    </item>
+    
+    <item>
+        <command>git stash drop</command>
+        <tagq>stash, drop, delete, remove</tagq>
+        <desc>stash : Remove latest stash from stash list</desc>
+        <alt>git stash drop stash@{1} (specific stash)</alt>
+        <warning>WARNING: Stash changes are permanently deleted!</warning>
+        <next>git stash list</next>
+    </item>
+    
+    <item>
+        <command>git stash clear</command>
+        <tagq>stash, clear, delete, all, remove</tagq>
+        <desc>stash : Delete ALL stashes (cannot be undone!)</desc>
+        <alt>git stash drop (for single stash)</alt>
+        <warning>DANGER: All stashes are permanently deleted!</warning>
+        <next>git stash list</next>
+    </item>
+
+    <!-- ============================================ -->
+    <!-- TAGS & RELEASES                              -->
+    <!-- ============================================ -->
+    
+    <item>
+        <command>git tag</command>
+        <tagq>tag, list, releases, versions</tagq>
+        <desc>tag : List all tags in the repository</desc>
+        <alt>git tag -l "v*" (filter tags)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git tag -a &lt;tagname&gt; -m "&lt;msg&gt;"</next>
+    </item>
+    
+    <item>
+        <command>git tag -a &lt;msg&gt; -m "&lt;msg&gt;"</command>
+        <tagq>tag, create, release, version, annotate</tagq>
+        <desc>tag : Create an annotated tag (with message) for current commit</desc>
+        <alt>git tag &lt;tagname&gt; (lightweight tag)</alt>
+        <warning>None</warning>
+        <next>git push origin &lt;tagname&gt;</next>
+    </item>
+    
+    <item>
+        <command>git push origin &lt;msg&gt;</command>
+        <tagq>tag, push, upload, release, remote</tagq>
+        <desc>push : Push a specific tag to remote repository</desc>
+        <alt>git push --tags (push all tags)</alt>
+        <warning>None</warning>
+        <next>git tag -d &lt;msg&gt;</next>
+    </item>
+    
+    <item>
+        <command>git tag -d &lt;msg&gt;</command>
+        <tagq>tag, delete, remove, local</tagq>
+        <desc>tag : Delete a local tag</desc>
+        <alt>git push origin --delete &lt;tagname&gt; (remote delete)</alt>
+        <warning>Only deletes local tag, not remote</warning>
+        <next>git push origin --delete &lt;tagname&gt;</next>
+    </item>
+    
+    <item>
+        <command>git push origin --delete &lt;msg&gt;</command>
+        <tagq>tag, delete, remote, remove, github</tagq>
+        <desc>push : Delete a tag from remote repository</desc>
+        <alt>git push origin :&lt;tagname&gt; (alternative syntax)</alt>
+        <warning>Only deletes remote tag, keeps local</warning>
+        <next>git tag -d &lt;msg&gt;</next>
+    </item>
+
+    <!-- ============================================ -->
+    <!-- MAINTENANCE & CLEANUP                        -->
+    <!-- ============================================ -->
+    
+    <item>
+        <command>git clean -fd</command>
+        <tagq>clean, remove, untracked, files, cleanup</tagq>
+        <desc>clean : Remove all untracked files and directories</desc>
+        <alt>git clean -n (dry-run preview)</alt>
+        <warning>DANGER: Permanently deletes untracked files!</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git clean -n</command>
+        <tagq>clean, preview, dry-run, untracked</tagq>
+        <desc>clean : Preview what files would be removed (dry-run)</desc>
+        <alt>git clean -fd (actual cleanup)</alt>
+        <warning>None (Preview only - safe)</warning>
+        <next>git clean -fd</next>
+    </item>
+    
+    <item>
+        <command>git gc</command>
+        <tagq>gc, garbage, cleanup, optimize, maintenance</tagq>
+        <desc>gc : Clean up unnecessary files and optimize repository</desc>
+        <alt>git gc --aggressive (more thorough)</alt>
+        <warning>None (Safe maintenance command)</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git fsck</command>
+        <tagq>fsck, verify, integrity, check, repair</tagq>
+        <desc>fsck : Verify integrity of Git repository objects</desc>
+        <alt>git fsck --full (thorough check)</alt>
+        <warning>None (Read-only diagnostic)</warning>
+        <next>git gc</next>
+    </item>
+
+    <!-- ============================================ -->
+    <!-- SUBMODULES                                   -->
+    <!-- ============================================ -->
+    
+    <item>
+        <command>git submodule add &lt;github&gt;</command>
+        <tagq>submodule, add, external, repo, dependency</tagq>
+        <desc>submodule : Add an external repository as a submodule</desc>
+        <alt>git submodule add &lt;url&gt; &lt;path&gt;</alt>
+        <warning>Clones another repo into your project</warning>
+        <next>git submodule init</next>
+    </item>
+    
+    <item>
+        <command>git submodule update --init --recursive</command>
+        <tagq>submodule, update, init, recursive, dependencies</tagq>
+        <desc>submodule : Initialize and update all submodules (including nested)</desc>
+        <alt>git submodule update --init (no recursion)</alt>
+        <warning>Will download all submodule dependencies</warning>
+        <next>git status</next>
+    </item>
+
+    <!-- ============================================ -->
+    <!-- ADVANCED / SPECIALIZED                       -->
+    <!-- ============================================ -->
+    
+    <item>
+        <command>git cherry-pick &lt;hash&gt;</command>
+        <tagq>cherry-pick, pick, apply, commit, specific</tagq>
+        <desc>cherry-pick : Apply specific commit from another branch to current branch</desc>
+        <alt>git cherry-pick &lt;hash1&gt; &lt;hash2&gt; (multiple)</alt>
+        <warning>May cause conflicts</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git bisect start</command>
+        <tagq>bisect, debug, find, bug, binary</tagq>
+        <desc>bisect : Start binary search to find commit that introduced a bug</desc>
+        <alt>git bisect start &lt;bad&gt; &lt;good&gt;</alt>
+        <warning>Time-consuming but powerful debugging tool</warning>
+        <next>git bisect good &lt;hash&gt; &amp; git bisect bad &lt;hash&gt;</next>
+    </item>
+    
+    <item>
+        <command>git bisect good &lt;hash&gt;</command>
+        <tagq>bisect, good, commit, mark</tagq>
+        <desc>bisect : Mark a commit as "good" during bisect search</desc>
+        <alt>git bisect good (if current commit is good)</alt>
+        <warning>Part of bisect debugging process</warning>
+        <next>git bisect bad &lt;hash&gt;</next>
+    </item>
+    
+    <item>
+        <command>git bisect bad &lt;hash&gt;</command>
+        <tagq>bisect, bad, commit, mark</tagq>
+        <desc>bisect : Mark a commit as "bad" during bisect search</desc>
+        <alt>git bisect bad (if current commit is bad)</alt>
+        <warning>Part of bisect debugging process</warning>
+        <next>git bisect reset</next>
+    </item>
+    
+    <item>
+        <command>git bisect reset</command>
+        <tagq>bisect, reset, end, stop</tagq>
+        <desc>bisect : End bisect session and return to original branch</desc>
+        <alt>git bisect reset &lt;branch&gt; (return to specific branch)</alt>
+        <warning>None</warning>
+        <next>git status</next>
+    </item>
+    
+    <item>
+        <command>git reflog</command>
+        <tagq>reflog, history, recovery, reference, log</tagq>
+        <desc>reflog : Show history of all branch updates (recover lost commits)</desc>
+        <alt>git reflog &lt;branch&gt; (specific branch)</alt>
+        <warning>None (Read-only - Lifesaver for recovery!)</warning>
+        <next>git reset --hard HEAD@{index}</next>
+    </item>
+    
+    <item>
+        <command>git archive --format=zip HEAD &gt; &lt;msg&gt;</command>
+        <tagq>archive, export, zip, download, backup</tagq>
+        <desc>archive : Export current repository as ZIP archive (e.g., git archive --format=zip HEAD > project.zip)</desc>
+        <alt>git archive --format=tar HEAD | gzip &gt; archive.tar.gz</alt>
+        <warning>None (Read-only)</warning>
+        <next>Extract archive file</next>
+    </item>
+    
+    <item>
+        <command>git shortlog -sn</command>
+        <tagq>shortlog, contributors, authors, stats, count</tagq>
+        <desc>shortlog : Show commit count per contributor (sorted by number of commits)</desc>
+        <alt>git shortlog -sne (with email addresses)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git log</next>
+    </item>
+
 </commands>

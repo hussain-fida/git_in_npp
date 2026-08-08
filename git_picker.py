@@ -2,6 +2,7 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 import tkinter as tk
+from tkinter import font
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 xml_file = os.path.join(script_dir, "git_commands.xml")
@@ -23,15 +24,43 @@ for item in root_xml.findall('item'):
     warning = item.find('warning').text if item.find('warning') is not None else "None"
     next_cmd = item.find('next').text if item.find('next') is not None else "N/A"
     
+    # Check if search term matches
     if search_term in tags.lower() or search_term in cmd.lower() or search_term in desc.lower():
+        # Calculate relevance score for sorting
+        score = 0
+        cmd_lower = cmd.lower()
+        desc_lower = desc.lower()
+        tags_lower = tags.lower()
+        
+        # Highest priority: command starts with search term (exact match at start)
+        if cmd_lower.startswith(search_term):
+            score += 100
+        # Second priority: search term is in command (as a word)
+        elif search_term in cmd_lower:
+            score += 50
+        # Third priority: search term is in tags
+        elif search_term in tags_lower:
+            score += 30
+        # Fourth priority: search term is in description
+        elif search_term in desc_lower:
+            score += 10
+        
+        # Additional boost for exact tag match
+        if search_term in tags_lower.split(', '):
+            score += 20
+            
         matches.append({
             "cmd": cmd,
             "desc": desc,
             "tags": tags,
             "alt": alt,
             "warning": warning,
-            "next": next_cmd
+            "next": next_cmd,
+            "score": score
         })
+
+# Sort matches by relevance score (highest first)
+matches.sort(key=lambda x: x["score"], reverse=True)
 
 if not matches:
     sys.exit(0)
@@ -46,12 +75,27 @@ lbl_header = tk.Label(root, text="Select Command (Up/Down to navigate | ENTER to
                       font=("Segoe UI", 9, "bold"), fg="#2b579a")
 lbl_header.pack(anchor="w", padx=10, pady=(8, 2))
 
-# Listbox
-listbox = tk.Listbox(root, font=("Segoe UI", 10), selectmode=tk.SINGLE, height=6)
-listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=2)
+# Listbox with search result count
+listbox_frame = tk.Frame(root)
+listbox_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=2)
 
+listbox = tk.Listbox(listbox_frame, font=("Segoe UI", 10), selectmode=tk.SINGLE, height=6)
+listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+scrollbar = tk.Scrollbar(listbox_frame, orient=tk.VERTICAL, command=listbox.yview)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+listbox.config(yscrollcommand=scrollbar.set)
+
+# Display matches with command prefix visible
 for m in matches:
-    listbox.insert(tk.END, f"• {m['desc']}")
+    # Extract command name from desc (format: "command : description")
+    display_text = m['desc']  # Already has "command : " prefix
+    listbox.insert(tk.END, f"• {display_text}")
+
+# Show result count
+result_count = tk.Label(root, text=f"Found {len(matches)} matching command(s)", 
+                        font=("Segoe UI", 8, "italic"), fg="#666666")
+result_count.pack(anchor="w", padx=10, pady=(0, 2))
 
 # Details Panel
 lbl_detail = tk.Label(root, text="Command Details & Guidance:", font=("Segoe UI", 9, "bold"))
@@ -131,7 +175,8 @@ def update_preview(event=None):
             f"ALT HINT : {m['alt']}\n"
             f"WARNING  : {m['warning']}\n"
             f"NEXT STEP: {m['next']}\n"
-            f"TAGS     : {m['tags']}"
+            f"TAGS     : {m['tags']}\n"
+            f"SCORE    : {m['score']} (relevance)"
         )
         
         txt_preview.config(state=tk.NORMAL)
@@ -153,20 +198,21 @@ def confirm_selection(event=None):
                 return  # Cancelled
                 
         elif "<branch>" in cmd:
-            branch = custom_prompt("Branch Name", "Enter Branch Name:")
+            branch = custom_prompt("Branch Name", "Enter Branch Name (Press Ctrl+ENTER or OK to submit):")
             if branch:
                 cmd = cmd.replace("<branch>", branch)
             else:
                 return
                 
         elif "<hash>" in cmd:
-            commit_hash = custom_prompt("Commit Hash", "Enter Commit Hash:")
+            commit_hash = custom_prompt("Commit Hash", "Enter Commit Hash (Press Ctrl+ENTER or OK to submit):")
             if commit_hash:
                 cmd = cmd.replace("<hash>", commit_hash)
             else:
                 return
+                
         elif "<github>" in cmd:
-            github = custom_prompt("GitHub Repo", "Enter GitHub Repo link i.e  https://github.com/gitHubUserName/gitHubRepoName.git:")
+            github = custom_prompt("GitHub Repo", "Enter GitHub Repo link (e.g., https://github.com/username/repo.git):")
             if github:
                 cmd = cmd.replace("<github>", github)
             else:
@@ -187,7 +233,7 @@ listbox.bind("<Return>", confirm_selection)
 listbox.bind("<Double-Button-1>", confirm_selection)
 root.bind("<Escape>", cancel_selection)
 
-# Initial setup
+# Initial setup - select first item (most relevant due to sorting)
 listbox.selection_set(0)
 listbox.focus_set()
 update_preview()
