@@ -111,23 +111,26 @@ lbl_footer.pack(anchor="e", padx=10, pady=(0, 8))
 
 selected_command = [""]
 
-def custom_prompt(title, prompt_text):
-    """Custom wide/tall dialog box replacing simpledialog.askstring."""
+def custom_prompt(title, prompt_text, default_value=""):
+    """Custom wide/tall dialog box with optional default value."""
     dialog = tk.Toplevel(root)
     dialog.title(title)
-    dialog.geometry("550x220")  # Custom width x height
+    dialog.geometry("550x220")
     dialog.attributes("-topmost", True)
-    dialog.grab_set()  # Make modal
+    dialog.grab_set()
     
     user_input = [""]
     
     lbl = tk.Label(dialog, text=prompt_text, font=("Segoe UI", 10, "bold"))
     lbl.pack(anchor="w", padx=15, pady=(15, 5))
     
-    # Larger multi-line entry area
+    # Entry with optional default value
     entry = tk.Text(dialog, height=4, font=("Consolas", 10), wrap="word", relief=tk.SOLID, bd=1)
     entry.pack(fill=tk.BOTH, expand=True, padx=15, pady=5)
+    if default_value:
+        entry.insert("1.0", default_value)
     entry.focus_set()
+    entry.tag_configure("center", justify='center')
     
     def on_ok(event=None):
         val = entry.get("1.0", tk.END).strip()
@@ -148,11 +151,118 @@ def custom_prompt(title, prompt_text):
     btn_cancel.pack(side=tk.LEFT, padx=5)
     
     # Keybindings for dialog
-    dialog.bind("<Control-Return>", on_ok)  # Ctrl+Enter to submit multi-line text
+    dialog.bind("<Control-Return>", on_ok)
     dialog.bind("<Escape>", on_cancel)
     
     root.wait_window(dialog)
     return user_input[0]
+
+def get_placeholder_prompt(cmd, placeholder):
+    """Return appropriate prompt based on placeholder type."""
+    prompts = {
+        'commitmsg': {
+            'title': 'Commit Message',
+            'prompt': 'Enter commit message (Press Ctrl+ENTER or OK to submit):\n\nTip: Use present tense, be descriptive',
+            'default': 'feat: Add new feature'
+        },
+        'branchname': {
+            'title': 'Branch Name',
+            'prompt': 'Enter branch name (Press Ctrl+ENTER or OK to submit):\n\nTip: Use descriptive names like feature/login-page',
+            'default': 'feature/new-feature'
+        },
+        'filename': {
+            'title': 'File Name',
+            'prompt': 'Enter file name/path (Press Ctrl+ENTER or OK to submit):\n\nTip: Use relative path like src/index.html',
+            'default': 'file.txt'
+        },
+        'commithash': {
+            'title': 'Commit Hash',
+            'prompt': 'Enter commit hash (Press Ctrl+ENTER or OK to submit):\n\nTip: Use full or short hash like a1b2c3d',
+            'default': 'a1b2c3d'
+        },
+        'repourl': {
+            'title': 'Repository URL',
+            'prompt': 'Enter repository URL (Press Ctrl+ENTER or OK to submit):\n\nTip: Format: https://github.com/username/repo.git',
+            'default': 'https://github.com/username/repo.git'
+        },
+        'username': {
+            'title': 'Git Username',
+            'prompt': 'Enter your Git username (Press Ctrl+ENTER or OK to submit):\n\nTip: Use your full name or GitHub username',
+            'default': 'Your Name'
+        },
+        'useremail': {
+            'title': 'Git Email',
+            'prompt': 'Enter your Git email (Press Ctrl+ENTER or OK to submit):\n\nTip: Use the email associated with your GitHub account',
+            'default': 'your.email@example.com'
+        },
+        'editor': {
+            'title': 'Text Editor',
+            'prompt': 'Enter editor command (Press Ctrl+ENTER or OK to submit):\n\nTip: Use "code --wait" for VS Code, "vim" for Vim',
+            'default': 'code --wait'
+        },
+        'tagname': {
+            'title': 'Tag Name',
+            'prompt': 'Enter tag name (Press Ctrl+ENTER or OK to submit):\n\nTip: Use version like v1.0.0',
+            'default': 'v1.0.0'
+        },
+        'tagmsg': {
+            'title': 'Tag Message',
+            'prompt': 'Enter tag message (Press Ctrl+ENTER or OK to submit):\n\nTip: Describe the release or version',
+            'default': 'Release version 1.0.0'
+        },
+        'stashmsg': {
+            'title': 'Stash Message',
+            'prompt': 'Enter stash message (Press Ctrl+ENTER or OK to submit):\n\nTip: Describe what you\'re stashing',
+            'default': 'WIP: Work in progress'
+        },
+        'number': {
+            'title': 'Number',
+            'prompt': 'Enter number (Press Ctrl+ENTER or OK to submit):\n\nTip: Enter a numeric value',
+            'default': '5'
+        },
+        'branch1': {
+            'title': 'First Branch',
+            'prompt': 'Enter first branch name (Press Ctrl+ENTER or OK to submit):\n\nTip: Usually the base branch',
+            'default': 'main'
+        },
+        'branch2': {
+            'title': 'Second Branch',
+            'prompt': 'Enter second branch name (Press Ctrl+ENTER or OK to submit):\n\nTip: Usually the feature branch',
+            'default': 'develop'
+        },
+        'repodir': {
+            'title': 'Directory Name',
+            'prompt': 'Enter directory name (Press Ctrl+ENTER or OK to submit):\n\nTip: Repository folder name after cloning',
+            'default': 'project-name'
+        }
+    }
+    
+    # Map placeholder to prompt config
+    placeholder_map = {
+        'commitmsg': prompts['commitmsg'],
+        'branchname': prompts['branchname'],
+        'filename': prompts['filename'],
+        'commithash': prompts['commithash'],
+        'repourl': prompts['repourl'],
+        'username': prompts['username'],
+        'useremail': prompts['useremail'],
+        'editor': prompts['editor'],
+        'tagname': prompts['tagname'],
+        'tagmsg': prompts['tagmsg'],
+        'stashmsg': prompts['stashmsg'],
+        'number': prompts['number'],
+        'branch1': prompts['branch1'],
+        'branch2': prompts['branch2'],
+        'repodir': prompts['repodir']
+    }
+    
+    prompt_config = placeholder_map.get(placeholder, {
+        'title': 'Input Required',
+        'prompt': f'Enter value for {placeholder} (Press Ctrl+ENTER or OK to submit):',
+        'default': ''
+    })
+    
+    return prompt_config['title'], prompt_config['prompt'], prompt_config['default']
 
 def update_preview(event=None):
     if event and event.keysym in ("Up", "Down"):
@@ -189,35 +299,31 @@ def confirm_selection(event=None):
     if selection:
         cmd = matches[selection[0]]['cmd']
         
-        # Interactive prompts using custom wide dialog
-        if "<msg>" in cmd:
-            msg = custom_prompt("Commit Message", "Enter Commit Message (Press Ctrl+ENTER or OK to submit):")
-            if msg:
-                cmd = cmd.replace("<msg>", msg)
-            else:
-                return  # Cancelled
+        # Dictionary to store all placeholder replacements
+        replacements = {}
+        
+        # Find all placeholders in the command
+        import re
+        placeholders = re.findall(r'<([^>]+)>', cmd)
+        
+        if placeholders:
+            # Process each placeholder
+            for placeholder in placeholders:
+                # Get the appropriate prompt for this placeholder
+                title, prompt_text, default_value = get_placeholder_prompt(cmd, placeholder)
                 
-        elif "<branch>" in cmd:
-            branch = custom_prompt("Branch Name", "Enter Branch Name (Press Ctrl+ENTER or OK to submit):")
-            if branch:
-                cmd = cmd.replace("<branch>", branch)
-            else:
-                return
-                
-        elif "<hash>" in cmd:
-            commit_hash = custom_prompt("Commit Hash", "Enter Commit Hash (Press Ctrl+ENTER or OK to submit):")
-            if commit_hash:
-                cmd = cmd.replace("<hash>", commit_hash)
-            else:
-                return
-                
-        elif "<github>" in cmd:
-            github = custom_prompt("GitHub Repo", "Enter GitHub Repo link (e.g., https://github.com/username/repo.git):")
-            if github:
-                cmd = cmd.replace("<github>", github)
-            else:
-                return
-
+                # Show the prompt dialog
+                value = custom_prompt(title, prompt_text, default_value)
+                if value:
+                    replacements[placeholder] = value
+                else:
+                    # User cancelled
+                    return
+            
+            # Apply all replacements
+            for placeholder, value in replacements.items():
+                cmd = cmd.replace(f'<{placeholder}>', value)
+        
         selected_command[0] = cmd
     root.destroy()
 

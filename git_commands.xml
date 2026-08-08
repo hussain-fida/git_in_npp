@@ -15,25 +15,25 @@
     </item>
     
     <item>
-        <command>git config --global user.name "&lt;msg&gt;"</command>
+        <command>git config --global user.name "&lt;username&gt;"</command>
         <tagq>config, global, user, name, setup</tagq>
         <desc>config : Set your global username for all commits</desc>
         <alt>git config user.name "Name" (local only)</alt>
         <warning>Overrides existing global username</warning>
-        <next>git config --global user.email "&lt;msg&gt;"</next>
+        <next>git config --global user.email "&lt;useremail&gt;"</next>
     </item>
     
     <item>
-        <command>git config --global user.email "&lt;msg&gt;"</command>
+        <command>git config --global user.email "&lt;useremail&gt;"</command>
         <tagq>config, global, user, email, setup</tagq>
         <desc>config : Set your global email for all commits</desc>
         <alt>git config user.email "email" (local only)</alt>
         <warning>Overrides existing global email</warning>
-        <next>git config --global core.editor "code --wait"</next>
+        <next>git config --global core.editor "&lt;editor&gt;"</next>
     </item>
     
     <item>
-        <command>git config --global core.editor "&lt;msg&gt;"</command>
+        <command>git config --global core.editor "&lt;editor&gt;"</command>
         <tagq>config, editor, setup, default</tagq>
         <desc>config : Set default text editor for Git (e.g., code --wait, vim, nano)</desc>
         <alt>git config core.editor "vim" (local only)</alt>
@@ -51,16 +51,16 @@
     </item>
     
     <item>
-        <command>git clone &lt;github&gt;</command>
+        <command>git clone &lt;repourl&gt;</command>
         <tagq>clone, download, copy, repo, github</tagq>
         <desc>clone : Clone a remote repository to your local machine</desc>
         <alt>git clone --depth 1 &lt;url&gt; (shallow clone)</alt>
         <warning>Downloads all files; ensure you have enough disk space</warning>
-        <next>cd &lt;repo-name&gt; &amp;&amp; git status</next>
+        <next>cd &lt;repodir&gt; &amp;&amp; git status</next>
     </item>
     
     <item>
-        <command>git remote add origin &lt;github&gt;</command>
+        <command>git remote add origin &lt;repourl&gt;</command>
         <tagq>remote, origin, github, link, connect</tagq>
         <desc>remote : Connect local repository to remote GitHub repository</desc>
         <alt>git remote add upstream &lt;url&gt; (add another remote)</alt>
@@ -83,7 +83,7 @@
         <desc>remote : Remove a remote repository connection</desc>
         <alt>git remote rm origin (alternative syntax)</alt>
         <warning>Only removes connection, doesn't delete remote repo</warning>
-        <next>git remote add origin &lt;url&gt;</next>
+        <next>git remote add origin &lt;repourl&gt;</next>
     </item>
 
     <!-- ============================================ -->
@@ -123,16 +123,16 @@
         <desc>diff : Show changes that are staged for commit</desc>
         <alt>git diff --cached</alt>
         <warning>None (Read-only)</warning>
-        <next>git commit -m "&lt;msg&gt;"</next>
+        <next>git commit -m "&lt;commitmsg&gt;"</next>
     </item>
     
     <item>
-        <command>git diff &lt;branch&gt;..&lt;branch&gt;</command>
+        <command>git diff &lt;branch1&gt;..&lt;branch2&gt;</command>
         <tagq>diff, branch, compare, between</tagq>
         <desc>diff : Show differences between two branches (e.g., main..develop)</desc>
         <alt>git diff &lt;branch1&gt;...&lt;branch2&gt; (3-dot comparison)</alt>
         <warning>None</warning>
-        <next>git merge &lt;branch&gt;</next>
+        <next>git merge &lt;branch2&gt;</next>
     </item>
 
     <!-- ============================================ -->
@@ -145,16 +145,16 @@
         <desc>add : Stage all modified and new files in current directory</desc>
         <alt>git add -A (stage all files in entire repo)</alt>
         <warning>Be careful not to stage temporary or sensitive files</warning>
-        <next>git commit -m "&lt;msg&gt;"</next>
+        <next>git commit -m "&lt;commitmsg&gt;"</next>
     </item>
     
     <item>
-        <command>git add &lt;msg&gt;</command>
+        <command>git add &lt;filename&gt;</command>
         <tagq>add, stage, file, specific, track</tagq>
         <desc>add : Stage a specific file for commit (e.g., git add index.html)</desc>
         <alt>git add *.txt (stage all txt files)</alt>
         <warning>None</warning>
-        <next>git commit -m "&lt;msg&gt;"</next>
+        <next>git commit -m "&lt;commitmsg&gt;"</next>
     </item>
     
     <item>
@@ -163,29 +163,29 @@
         <desc>add : Stage changes interactively (hunk by hunk) - great for splitting commits</desc>
         <alt>git add --patch</alt>
         <warning>Requires careful review of each hunk</warning>
-        <next>git commit -m "&lt;msg&gt;"</next>
+        <next>git commit -m "&lt;commitmsg&gt;"</next>
     </item>
     
     <item>
-        <command>git commit -m "&lt;msg&gt;"</command>
+        <command>git commit -m "&lt;commitmsg&gt;"</command>
         <tagq>commit, save, record, message</tagq>
         <desc>commit : Commit staged changes with a custom message</desc>
-        <alt>git commit -am "&lt;msg&gt;" (stage and commit all tracked files)</alt>
+        <alt>git commit -am "&lt;commitmsg&gt;" (stage and commit all tracked files)</alt>
         <warning>Requires staged changes first</warning>
         <next>git push origin main</next>
     </item>
     
     <item>
-        <command>git commit -am "&lt;msg&gt;"</command>
+        <command>git commit -am "&lt;commitmsg&gt;"</command>
         <tagq>commit, save, record, all, auto-stage</tagq>
         <desc>commit : Stage all tracked files AND commit with one command</desc>
-        <alt>git add . &amp;&amp; git commit -m "&lt;msg&gt;"</alt>
+        <alt>git add . &amp;&amp; git commit -m "&lt;commitmsg&gt;"</alt>
         <warning>Only stages already tracked files, not new files</warning>
         <next>git push origin main</next>
     </item>
     
     <item>
-        <command>git commit --amend -m "&lt;msg&gt;"</command>
+        <command>git commit --amend -m "&lt;commitmsg&gt;"</command>
         <tagq>commit, amend, fix, edit, update, last</tagq>
         <desc>commit : Replace the last commit with a new one (different message)</desc>
         <alt>git commit --amend --no-edit (keep same message)</alt>
@@ -197,7 +197,7 @@
         <command>git commit --amend --no-edit</command>
         <tagq>commit, amend, fix, edit, update, last, keep</tagq>
         <desc>commit : Combine staged changes into last commit without changing message</desc>
-        <alt>git commit --amend -m "&lt;msg&gt;"</alt>
+        <alt>git commit --amend -m "&lt;commitmsg&gt;"</alt>
         <warning>DANGER: Don't use if commit already pushed!</warning>
         <next>git push --force-with-lease</next>
     </item>
@@ -212,7 +212,7 @@
         <desc>branch : List all local branches (* indicates current branch)</desc>
         <alt>git branch -a (show all remote branches too)</alt>
         <warning>None (Read-only)</warning>
-        <next>git checkout &lt;branch&gt;</next>
+        <next>git checkout &lt;branchname&gt;</next>
     </item>
     
     <item>
@@ -221,68 +221,68 @@
         <desc>branch : List all local and remote branches</desc>
         <alt>git branch -r (remote branches only)</alt>
         <warning>None (Read-only)</warning>
-        <next>git checkout -b &lt;branch&gt;</next>
+        <next>git checkout -b &lt;branchname&gt;</next>
     </item>
     
     <item>
-        <command>git branch &lt;branch&gt;</command>
+        <command>git branch &lt;branchname&gt;</command>
         <tagq>branch, create, new</tagq>
         <desc>branch : Create a new branch (but don't switch to it)</desc>
-        <alt>git checkout -b &lt;branch&gt; (create and switch)</alt>
+        <alt>git checkout -b &lt;branchname&gt; (create and switch)</alt>
         <warning>None</warning>
-        <next>git checkout &lt;branch&gt;</next>
+        <next>git checkout &lt;branchname&gt;</next>
     </item>
     
     <item>
-        <command>git checkout &lt;branch&gt;</command>
+        <command>git checkout &lt;branchname&gt;</command>
         <tagq>checkout, switch, branch, navigate</tagq>
         <desc>checkout : Switch to an existing branch</desc>
-        <alt>git switch &lt;branch&gt; (newer syntax)</alt>
+        <alt>git switch &lt;branchname&gt; (newer syntax)</alt>
         <warning>Commit or stash changes before switching</warning>
         <next>git status</next>
     </item>
     
     <item>
-        <command>git checkout -b &lt;branch&gt;</command>
+        <command>git checkout -b &lt;branchname&gt;</command>
         <tagq>checkout, branch, create, new, switch</tagq>
         <desc>checkout : Create and switch to a new branch in one command</desc>
-        <alt>git switch -c &lt;branch&gt;</alt>
+        <alt>git switch -c &lt;branchname&gt;</alt>
         <warning>Ensure working directory is clean before switching</warning>
         <next>git status</next>
     </item>
     
     <item>
-        <command>git switch &lt;branch&gt;</command>
+        <command>git switch &lt;branchname&gt;</command>
         <tagq>switch, branch, navigate, move</tagq>
         <desc>switch : Switch to an existing branch (newer Git syntax)</desc>
-        <alt>git checkout &lt;branch&gt; (older syntax)</alt>
+        <alt>git checkout &lt;branchname&gt; (older syntax)</alt>
         <warning>Commit or stash changes before switching</warning>
         <next>git status</next>
     </item>
     
     <item>
-        <command>git switch -c &lt;branch&gt;</command>
+        <command>git switch -c &lt;branchname&gt;</command>
         <tagq>switch, create, new, branch</tagq>
         <desc>switch : Create and switch to new branch (newer Git syntax)</desc>
-        <alt>git checkout -b &lt;branch&gt;</alt>
+        <alt>git checkout -b &lt;branchname&gt;</alt>
         <warning>None</warning>
         <next>git status</next>
     </item>
     
     <item>
-        <command>git branch -d &lt;branch&gt;</command>
+        <command>git branch -d &lt;branchname&gt;</command>
         <tagq>branch, delete, remove, safe</tagq>
         <desc>branch : Delete a branch (safe - only if merged)</desc>
-        <alt>git branch -D &lt;branch&gt; (force delete)</alt>
+        <alt>git branch -D &lt;branchname&gt; (force delete)</alt>
         <warning>Will fail if branch has unmerged changes</warning>
         <next>git branch</next>
     </item>
     
     <item>
-        <command>git branch -D &lt;branch&gt;</command>
+        <command>git branch -D &lt;branchname&gt;</command>
         <tagq>branch, delete, remove, force</tagq>
         <desc>branch : Force delete a branch (even if not merged)</desc>
-        <alt>git branch -d &lt;branch&gt; (safe version)</alt>
+        <alt>git branch -d &lt;branchname&gt; (safe version)</alt>
         <warning>WARNING: Changes in this branch may be lost forever!</warning>
         <next>git branch</next>
     </item>
@@ -292,10 +292,10 @@
     <!-- ============================================ -->
     
     <item>
-        <command>git merge &lt;branch&gt;</command>
+        <command>git merge &lt;branchname&gt;</command>
         <tagq>merge, combine, integrate, branch</tagq>
         <desc>merge : Merge changes from another branch into current branch</desc>
-        <alt>git merge --no-ff &lt;branch&gt; (force merge commit)</alt>
+        <alt>git merge --no-ff &lt;branchname&gt; (force merge commit)</alt>
         <warning>May create merge conflicts that need resolution</warning>
         <next>git status</next>
     </item>
@@ -310,7 +310,7 @@
     </item>
     
     <item>
-        <command>git rebase &lt;branch&gt;</command>
+        <command>git rebase &lt;branchname&gt;</command>
         <tagq>rebase, reorganize, history, branch</tagq>
         <desc>rebase : Reapply commits on top of another branch (cleaner history)</desc>
         <alt>git rebase -i HEAD~3 (interactive rebase)</alt>
@@ -319,10 +319,10 @@
     </item>
     
     <item>
-        <command>git rebase -i HEAD~&lt;msg&gt;</command>
+        <command>git rebase -i HEAD~&lt;number&gt;</command>
         <tagq>rebase, interactive, history, squash, edit</tagq>
         <desc>rebase : Interactive rebase to squash, reorder, or edit last N commits (replace N with number)</desc>
-        <alt>git rebase -i &lt;hash&gt; (rebase from specific commit)</alt>
+        <alt>git rebase -i &lt;commithash&gt; (rebase from specific commit)</alt>
         <warning>DANGER: Only use on local commits before pushing!</warning>
         <next>git push --force-with-lease</next>
     </item>
@@ -332,21 +332,21 @@
     <!-- ============================================ -->
     
     <item>
-        <command>git push origin &lt;branch&gt;</command>
+        <command>git push origin &lt;branchname&gt;</command>
         <tagq>push, remote, upload, github, hub</tagq>
         <desc>push : Push local commits to remote branch</desc>
-        <alt>git push -u origin &lt;branch&gt; (set upstream)</alt>
+        <alt>git push -u origin &lt;branchname&gt; (set upstream)</alt>
         <warning>Will fail if remote has new commits you don't have</warning>
         <next>git status</next>
     </item>
     
     <item>
-        <command>git push -u origin &lt;branch&gt;</command>
+        <command>git push -u origin &lt;branchname&gt;</command>
         <tagq>push, remote, upload, upstream, set, first</tagq>
         <desc>push : Push and set upstream tracking for new branch (first push)</desc>
-        <alt>git push --set-upstream origin &lt;branch&gt;</alt>
+        <alt>git push --set-upstream origin &lt;branchname&gt;</alt>
         <warning>None for first push of new branch</warning>
-        <next>git push origin &lt;branch&gt;</next>
+        <next>git push origin &lt;branchname&gt;</next>
     </item>
     
     <item>
@@ -359,19 +359,19 @@
     </item>
     
     <item>
-        <command>git pull origin &lt;branch&gt;</command>
+        <command>git pull origin &lt;branchname&gt;</command>
         <tagq>pull, fetch, merge, sync, update</tagq>
         <desc>pull : Fetch and merge remote changes into current branch</desc>
-        <alt>git pull --rebase origin &lt;branch&gt; (rebase instead of merge)</alt>
+        <alt>git pull --rebase origin &lt;branchname&gt; (rebase instead of merge)</alt>
         <warning>May cause merge conflicts</warning>
         <next>git status</next>
     </item>
     
     <item>
-        <command>git pull --rebase origin &lt;branch&gt;</command>
+        <command>git pull --rebase origin &lt;branchname&gt;</command>
         <tagq>pull, rebase, fetch, sync, update, cleaner</tagq>
         <desc>pull : Pull with rebase for cleaner linear history</desc>
-        <alt>git pull origin &lt;branch&gt; (merge version)</alt>
+        <alt>git pull origin &lt;branchname&gt; (merge version)</alt>
         <warning>May cause conflicts during rebase</warning>
         <next>git status</next>
     </item>
@@ -399,28 +399,28 @@
     <!-- ============================================ -->
     
     <item>
-        <command>git checkout -- &lt;msg&gt;</command>
+        <command>git checkout -- &lt;filename&gt;</command>
         <tagq>revert, discard, checkout, restore, file</tagq>
         <desc>checkout : Discard local unstaged changes in specific file (e.g., git checkout -- index.html)</desc>
-        <alt>git restore &lt;file&gt; (newer syntax)</alt>
+        <alt>git restore &lt;filename&gt; (newer syntax)</alt>
         <warning>RISKY: Unstaged changes in this file will be permanently lost!</warning>
         <next>git status</next>
     </item>
     
     <item>
-        <command>git restore &lt;msg&gt;</command>
+        <command>git restore &lt;filename&gt;</command>
         <tagq>restore, revert, discard, file, reset</tagq>
         <desc>restore : Discard local unstaged changes in specific file (newer Git)</desc>
-        <alt>git checkout -- &lt;file&gt;</alt>
+        <alt>git checkout -- &lt;filename&gt;</alt>
         <warning>RISKY: Changes in this file will be permanently lost!</warning>
         <next>git status</next>
     </item>
     
     <item>
-        <command>git reset HEAD &lt;msg&gt;</command>
+        <command>git reset HEAD &lt;filename&gt;</command>
         <tagq>reset, unstage, file, undo</tagq>
         <desc>reset : Unstage a specific file but keep changes in working directory</desc>
-        <alt>git restore --staged &lt;file&gt;</alt>
+        <alt>git restore --staged &lt;filename&gt;</alt>
         <warning>Only removes from staging, doesn't delete changes</warning>
         <next>git status</next>
     </item>
@@ -440,7 +440,7 @@
         <desc>reset : Undo last commit but keep changes unstaged (default)</desc>
         <alt>git reset --mixed HEAD~1</alt>
         <warning>Modifies commit history</warning>
-        <next>git add . &amp;&amp; git commit -m "&lt;msg&gt;"</next>
+        <next>git add . &amp;&amp; git commit -m "&lt;commitmsg&gt;"</next>
     </item>
     
     <item>
@@ -453,7 +453,7 @@
     </item>
     
     <item>
-        <command>git revert &lt;hash&gt;</command>
+        <command>git revert &lt;commithash&gt;</command>
         <tagq>revert, undo, commit, safe, public</tagq>
         <desc>revert : Create new commit that undoes a previous commit (safe for public branches)</desc>
         <alt>git revert HEAD~1 (revert last commit)</alt>
@@ -489,34 +489,34 @@
         <desc>log : Show commit history with branch visualization (last 15 commits)</desc>
         <alt>git log --oneline --graph --all (all commits)</alt>
         <warning>None (Read-only)</warning>
-        <next>git show &lt;hash&gt;</next>
+        <next>git show &lt;commithash&gt;</next>
     </item>
     
     <item>
-        <command>git show &lt;hash&gt;</command>
+        <command>git show &lt;commithash&gt;</command>
         <tagq>show, view, commit, details, hash</tagq>
         <desc>show : Show detailed information about a specific commit</desc>
         <alt>git show HEAD (latest commit)</alt>
         <warning>None (Read-only)</warning>
-        <next>git diff &lt;hash&gt;^..&lt;hash&gt;</next>
+        <next>git diff &lt;commithash&gt;^..&lt;commithash&gt;</next>
     </item>
     
     <item>
-        <command>git blame &lt;msg&gt;</command>
+        <command>git blame &lt;filename&gt;</command>
         <tagq>blame, who, author, line, file</tagq>
         <desc>blame : Show who last modified each line of a file (e.g., git blame index.html)</desc>
-        <alt>git blame -L 10,20 &lt;file&gt; (specific lines)</alt>
+        <alt>git blame -L 10,20 &lt;filename&gt; (specific lines)</alt>
         <warning>None (Read-only)</warning>
-        <next>git log --follow &lt;msg&gt;</next>
+        <next>git log --follow &lt;filename&gt;</next>
     </item>
     
     <item>
-        <command>git log --follow &lt;msg&gt;</command>
+        <command>git log --follow &lt;filename&gt;</command>
         <tagq>log, follow, file, history, tracking</tagq>
         <desc>log : Show commit history for a specific file (including renames)</desc>
-        <alt>git log -p &lt;file&gt; (show diff for each commit)</alt>
+        <alt>git log -p &lt;filename&gt; (show diff for each commit)</alt>
         <warning>None (Read-only)</warning>
-        <next>git blame &lt;msg&gt;</next>
+        <next>git blame &lt;filename&gt;</next>
     </item>
 
     <!-- ============================================ -->
@@ -527,13 +527,13 @@
         <command>git stash</command>
         <tagq>stash, save, temporary, uncommitted, hide</tagq>
         <desc>stash : Save uncommitted changes to stash (to switch branches)</desc>
-        <alt>git stash save "&lt;msg&gt;" (with custom message)</alt>
+        <alt>git stash save "&lt;stashmsg&gt;" (with custom message)</alt>
         <warning>Changes are saved but removed from working directory</warning>
-        <next>git checkout &lt;branch&gt; or git stash pop</next>
+        <next>git checkout &lt;branchname&gt; or git stash pop</next>
     </item>
     
     <item>
-        <command>git stash save "&lt;msg&gt;"</command>
+        <command>git stash save "&lt;stashmsg&gt;"</command>
         <tagq>stash, save, message, named, custom</tagq>
         <desc>stash : Save uncommitted changes with a descriptive message</desc>
         <alt>git stash (without message)</alt>
@@ -596,11 +596,11 @@
         <desc>tag : List all tags in the repository</desc>
         <alt>git tag -l "v*" (filter tags)</alt>
         <warning>None (Read-only)</warning>
-        <next>git tag -a &lt;tagname&gt; -m "&lt;msg&gt;"</next>
+        <next>git tag -a &lt;tagname&gt; -m "&lt;tagmsg&gt;"</next>
     </item>
     
     <item>
-        <command>git tag -a &lt;msg&gt; -m "&lt;msg&gt;"</command>
+        <command>git tag -a &lt;tagname&gt; -m "&lt;tagmsg&gt;"</command>
         <tagq>tag, create, release, version, annotate</tagq>
         <desc>tag : Create an annotated tag (with message) for current commit</desc>
         <alt>git tag &lt;tagname&gt; (lightweight tag)</alt>
@@ -609,16 +609,16 @@
     </item>
     
     <item>
-        <command>git push origin &lt;msg&gt;</command>
+        <command>git push origin &lt;tagname&gt;</command>
         <tagq>tag, push, upload, release, remote</tagq>
         <desc>push : Push a specific tag to remote repository</desc>
         <alt>git push --tags (push all tags)</alt>
         <warning>None</warning>
-        <next>git tag -d &lt;msg&gt;</next>
+        <next>git tag -d &lt;tagname&gt;</next>
     </item>
     
     <item>
-        <command>git tag -d &lt;msg&gt;</command>
+        <command>git tag -d &lt;tagname&gt;</command>
         <tagq>tag, delete, remove, local</tagq>
         <desc>tag : Delete a local tag</desc>
         <alt>git push origin --delete &lt;tagname&gt; (remote delete)</alt>
@@ -627,12 +627,12 @@
     </item>
     
     <item>
-        <command>git push origin --delete &lt;msg&gt;</command>
+        <command>git push origin --delete &lt;tagname&gt;</command>
         <tagq>tag, delete, remote, remove, github</tagq>
         <desc>push : Delete a tag from remote repository</desc>
         <alt>git push origin :&lt;tagname&gt; (alternative syntax)</alt>
         <warning>Only deletes remote tag, keeps local</warning>
-        <next>git tag -d &lt;msg&gt;</next>
+        <next>git tag -d &lt;tagname&gt;</next>
     </item>
 
     <!-- ============================================ -->
@@ -680,10 +680,10 @@
     <!-- ============================================ -->
     
     <item>
-        <command>git submodule add &lt;github&gt;</command>
+        <command>git submodule add &lt;repourl&gt;</command>
         <tagq>submodule, add, external, repo, dependency</tagq>
         <desc>submodule : Add an external repository as a submodule</desc>
-        <alt>git submodule add &lt;url&gt; &lt;path&gt;</alt>
+        <alt>git submodule add &lt;repourl&gt; &lt;path&gt;</alt>
         <warning>Clones another repo into your project</warning>
         <next>git submodule init</next>
     </item>
@@ -702,10 +702,10 @@
     <!-- ============================================ -->
     
     <item>
-        <command>git cherry-pick &lt;hash&gt;</command>
+        <command>git cherry-pick &lt;commithash&gt;</command>
         <tagq>cherry-pick, pick, apply, commit, specific</tagq>
         <desc>cherry-pick : Apply specific commit from another branch to current branch</desc>
-        <alt>git cherry-pick &lt;hash1&gt; &lt;hash2&gt; (multiple)</alt>
+        <alt>git cherry-pick &lt;commithash1&gt; &lt;commithash2&gt; (multiple)</alt>
         <warning>May cause conflicts</warning>
         <next>git status</next>
     </item>
@@ -716,20 +716,20 @@
         <desc>bisect : Start binary search to find commit that introduced a bug</desc>
         <alt>git bisect start &lt;bad&gt; &lt;good&gt;</alt>
         <warning>Time-consuming but powerful debugging tool</warning>
-        <next>git bisect good &lt;hash&gt; &amp; git bisect bad &lt;hash&gt;</next>
+        <next>git bisect good &lt;commithash&gt; &amp; git bisect bad &lt;commithash&gt;</next>
     </item>
     
     <item>
-        <command>git bisect good &lt;hash&gt;</command>
+        <command>git bisect good &lt;commithash&gt;</command>
         <tagq>bisect, good, commit, mark</tagq>
         <desc>bisect : Mark a commit as "good" during bisect search</desc>
         <alt>git bisect good (if current commit is good)</alt>
         <warning>Part of bisect debugging process</warning>
-        <next>git bisect bad &lt;hash&gt;</next>
+        <next>git bisect bad &lt;commithash&gt;</next>
     </item>
     
     <item>
-        <command>git bisect bad &lt;hash&gt;</command>
+        <command>git bisect bad &lt;commithash&gt;</command>
         <tagq>bisect, bad, commit, mark</tagq>
         <desc>bisect : Mark a commit as "bad" during bisect search</desc>
         <alt>git bisect bad (if current commit is bad)</alt>
@@ -741,7 +741,7 @@
         <command>git bisect reset</command>
         <tagq>bisect, reset, end, stop</tagq>
         <desc>bisect : End bisect session and return to original branch</desc>
-        <alt>git bisect reset &lt;branch&gt; (return to specific branch)</alt>
+        <alt>git bisect reset &lt;branchname&gt; (return to specific branch)</alt>
         <warning>None</warning>
         <next>git status</next>
     </item>
@@ -750,16 +750,16 @@
         <command>git reflog</command>
         <tagq>reflog, history, recovery, reference, log</tagq>
         <desc>reflog : Show history of all branch updates (recover lost commits)</desc>
-        <alt>git reflog &lt;branch&gt; (specific branch)</alt>
+        <alt>git reflog &lt;branchname&gt; (specific branch)</alt>
         <warning>None (Read-only - Lifesaver for recovery!)</warning>
         <next>git reset --hard HEAD@{index}</next>
     </item>
     
     <item>
-        <command>git archive --format=zip HEAD &gt; &lt;msg&gt;</command>
+        <command>git archive --format=zip HEAD &gt; &lt;filename&gt;</command>
         <tagq>archive, export, zip, download, backup</tagq>
         <desc>archive : Export current repository as ZIP archive (e.g., git archive --format=zip HEAD > project.zip)</desc>
-        <alt>git archive --format=tar HEAD | gzip &gt; archive.tar.gz</alt>
+        <alt>git archive --format=tar HEAD | gzip &gt; &lt;filename&gt;</alt>
         <warning>None (Read-only)</warning>
         <next>Extract archive file</next>
     </item>
