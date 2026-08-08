@@ -1,0 +1,3 @@
+this file does nothing .
+this is to be placed in the local repository folder 
+& keep opened in npp so that that npp can detect current project folder

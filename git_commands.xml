@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<commands>
+	
+    <item>
+        <command>git init</command>
+        <tagq>init, start, begin, repo</tagq>
+        <desc>Initialized empty Git repository in /path/to/my-project-name/.git/</desc>
+        <alt> </alt>
+        <warning>None (Safe read-only command)</warning>
+        <next>git config --global user.name "Your Full Name" \n git config --global user.email "your.email@example.com"</next>
+    </item>
+	
+	
+	<item>
+        <command>git config --global user.name "&lt;msg&gt;"</command>
+        <tagq>config, global, user, name</tagq>
+        <desc>Set your name (this will be attached to your commits):</desc>
+        <alt> </alt>
+        <warning>May override existing user </warning>
+        <next>git config --global user.email "your.email@example.com"</next>
+    </item>
+	
+	
+	<item>
+        <command>git remote add origin "&lt;github&gt;"</command>
+        <tagq>remote, origin, github, link</tagq>
+        <desc>Connect Local Repo to GitHub:</desc>
+        <alt> </alt>
+        <warning>May override existing user </warning>
+        <next>git config --global user.email "your.email@example.com"</next>
+    </item>
+	
+	
+	<!-- Basic / Status -->
+    <item>
+        <command>git status</command>
+        <tagq>status, check, info, state, diff</tagq>
+        <desc>Check repository status (working tree &amp; staging area)</desc>
+        <alt>git status -s (for compact view)</alt>
+        <warning>None (Safe read-only command)</warning>
+        <next>git add . or git diff</next>
+    </item>
+	
+	<item>
+        <command>git status -s</command>
+        <tagq>status, check, info, state, diff</tagq>
+        <desc>Check repository status (working tree &amp; staging area) compact view</desc>
+        <alt>git status</alt>
+        <warning>None (Safe read-only command)</warning>
+        <next>git add . or git diff</next>
+    </item>
+	
+	
+    <item>
+        <command>git diff</command>
+        <tagq>diff, changes, compare, modified</tagq>
+        <desc>Show unstaged changes in working directory</desc>
+        <alt>git diff --staged (for staged changes)</alt>
+        <warning>None (Read-only)</warning>
+        <next>git add .</next>
+    </item>
+
+
+
+    <!-- Staging & Committing -->
+    <item>
+        <command>git add .</command>
+        <tagq>add, stage, all, track, tag1</tagq>
+        <desc>Stage all modified and new files for commit</desc>
+        <alt>git add "$(FILE_NAME)" (stage current active file only)</alt>
+        <warning>Be careful not to stage untracked temporary files</warning>
+        <next>git commit -m "Your commit message"</next>
+    </item>
+	
+    <item>
+		<command>git commit -m "&lt;msg&gt;"</command>
+		<tagq>commit, save, record, message</tagq>
+		<desc>Commit staged changes with a custom message</desc>
+		<alt>git commit --amend --no-edit</alt>
+		<warning>Requires staged changes first</warning>
+		<next>git push origin main</next>
+	</item>
+
+    <item>
+        <command>git commit --amend --no-edit</command>
+        <tagq>commit, amend, fix, edit, update</tagq>
+        <desc>Combine staged changes into the most recent commit without changing message</desc>
+        <alt>git commit --amend -m "new message"</alt>
+        <warning>Do NOT use if the commit has already been pushed to remote</warning>
+        <next>git push --force-with-lease (if already pushed)</next>
+    </item>
+
+    <!-- Branching & Checkout -->
+    <item>
+        <command>git branch -a</command>
+        <tagq>branch, list, remote, local</tagq>
+        <desc>List all local and remote branches</desc>
+        <alt>git branch (local branches only)</alt>
+        <warning>None</warning>
+        <next>git checkout &lt;branch-name&gt;</next>
+    </item>
+	
+    <item>
+        <command>git checkout -b feature-branch</command>
+        <tagq>branch, checkout, create, new, switch</tagq>
+        <desc>Create and switch to a new local branch</desc>
+        <alt>git switch -c feature-branch</alt>
+        <warning>Ensure current working directory is clean before switching</warning>
+        <next>git status</next>
+    </item>
+
+    <!-- Remote & Synchronizing -->
+    <item>
+        <command>git push origin main</command>
+        <tagq>push, remote, upload, github, hub, tag1</tagq>
+        <desc>Push local commits to remote main branch</desc>
+        <alt>git push -u origin &lt;branch-name&gt;</alt>
+        <warning>May fail if remote contains commits you do not have locally</warning>
+        <next>git status</next>
+    </item>
+	
+    <item>
+        <command>git pull origin main</command>
+        <tagq>pull, fetch, merge, sync, update</tagq>
+        <desc>Fetch and merge changes from remote main branch</desc>
+        <alt>git pull --rebase origin main</alt>
+        <warning>May cause merge conflicts if local files overlap with remote changes</warning>
+        <next>git status</next>
+    </item>
+
+    <!-- Undoing & Reverting -->
+    <item>
+        <command>git checkout -- "$(FILE_NAME)"</command>
+        <tagq>revert, discard, checkout, restore, file</tagq>
+        <desc>Discard local unstaged changes in the current active file</desc>
+        <alt>git restore "$(FILE_NAME)"</alt>
+        <warning>RISKY: Unstaged changes in this file will be permanently lost!</warning>
+        <next>git status</next>
+    </item>
+	
+    <item>
+        <command>git reset HEAD~1 --soft</command>
+        <tagq>reset, undo, commit, soft</tagq>
+        <desc>Undo last commit but keep modified files staged</desc>
+        <alt>git reset HEAD~1 (keeps modifications unstaged)</alt>
+        <warning>Modifies commit history</warning>
+        <next>git status</next>
+    </item>
+
+    <!-- Logs & History -->
+    <item>
+        <command>git log --oneline --graph --all -n 15</command>
+        <tagq>log, history, graph, tree, visual</tagq>
+        <desc>Show concise commit history with branch graph (last 15 commits)</desc>
+        <alt>git log -n 5</alt>
+        <warning>None</warning>
+        <next>git show &lt;commit-hash&gt;</next>
+    </item>
+	
+</commands>
