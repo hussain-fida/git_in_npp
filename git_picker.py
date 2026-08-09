@@ -1,337 +1,403 @@
 import sys
 import os
+import re
 import xml.etree.ElementTree as ET
 import tkinter as tk
-from tkinter import font
+from tkinter import font, messagebox
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 xml_file = os.path.join(script_dir, "git_commands.xml")
+visuals_dir = os.path.join(script_dir, "visuals")
+
+# Ensure visuals directory exists and contains all required GIF files
+required_gifs = [
+    "add.gif", "commit.gif", "push.gif", "pull_fetch.gif",
+    "checkout_switch.gif", "merge.gif", "rebase.gif", "stash.gif",
+    "reset.gif", "restore.gif", "diff.gif", "log.gif", "tag.gif",
+    "clean.gif", "worktree.gif", "cherrypick.gif", "submodule.gif", "default.gif"
+]
+
+missing_gifs = not os.path.exists(visuals_dir) or any(
+    not os.path.exists(os.path.join(visuals_dir, g)) for g in required_gifs
+)
+
+if missing_gifs:
+    try:
+        from generate_visuals import create_visuals
+        create_visuals()
+    except Exception as e:
+        print(f"Notice: Visual generation warning: {e}")
 
 search_term = sys.argv[1].lower().strip() if len(sys.argv) > 1 else ""
 
-if not os.path.exists(xml_file):
+def show_error_dialog(title, message):
+    """Graceful error popup dialog."""
+    try:
+        err_root = tk.Tk()
+        err_root.withdraw()
+        err_root.attributes("-topmost", True)
+        messagebox.showerror(title, message, parent=err_root)
+        err_root.destroy()
+    except Exception:
+        print(f"[{title}] {message}")
+
+def load_xml_safely(filepath):
+    """Safely loads XML file, auto-repairing unescaped brackets or entity errors if needed."""
+    if not os.path.exists(filepath):
+        show_error_dialog("File Not Found", f"Database file not found:\n{filepath}")
+        return None
+    try:
+        tree = ET.parse(filepath)
+        return tree.getroot()
+    except ET.ParseError as pe:
+        # Auto-recovery: Read raw file content and sanitize unescaped < > brackets in text nodes
+        try:
+            with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+            
+            valid_tags = {'commands', '/commands', 'item', '/item', 'command', '/command', 
+                          'tagq', '/tagq', 'desc', '/desc', 'desc1', '/desc1', 
+                          'desc2', '/desc2', 'gif', '/gif', 'alt', '/alt', 'warning', '/warning', 'next', '/next'}
+            
+            def sanitize_bracket(match):
+                tag_name = match.group(1)
+                if tag_name in valid_tags:
+                    return f"<{tag_name}>"
+                return f"&lt;{tag_name}&gt;"
+
+            sanitized = re.sub(r'<([^>]+)>', sanitize_bracket, content)
+            root = ET.fromstring(sanitized)
+            return root
+        except Exception as recovery_err:
+            show_error_dialog("XML Parse Error", f"Failed to parse 'git_commands.xml':\n\n{pe}\n\nRecovery attempt also failed: {recovery_err}")
+            return None
+    except Exception as e:
+        show_error_dialog("XML Load Error", f"Unexpected error reading XML:\n\n{e}")
+        return None
+
+root_xml = load_xml_safely(xml_file)
+if root_xml is None:
     sys.exit(0)
 
-tree = ET.parse(xml_file)
-root_xml = tree.getroot()
-
 matches = []
-for item in root_xml.findall('item'):
-    cmd = item.find('command').text if item.find('command') is not None else ""
-    tags = item.find('tagq').text if item.find('tagq') is not None else ""
-    desc = item.find('desc').text if item.find('desc') is not None else ""
-    alt = item.find('alt').text if item.find('alt') is not None else "N/A"
-    warning = item.find('warning').text if item.find('warning') is not None else "None"
-    next_cmd = item.find('next').text if item.find('next') is not None else "N/A"
-    
-    # Check if search term matches
-    if search_term in tags.lower() or search_term in cmd.lower() or search_term in desc.lower():
-        # Calculate relevance score for sorting
-        score = 0
-        cmd_lower = cmd.lower()
-        desc_lower = desc.lower()
-        tags_lower = tags.lower()
+try:
+    for item in root_xml.findall('item'):
+        cmd = item.find('command').text if item.find('command') is not None else ""
+        tags = item.find('tagq').text if item.find('tagq') is not None else ""
+        desc = item.find('desc').text if item.find('desc') is not None else ""
+        desc1 = item.find('desc1').text if item.find('desc1') is not None else "Detailed mechanism not specified."
+        desc2 = item.find('desc2').text if item.find('desc2') is not None else "Practical use cases not specified."
+        gif_file = item.find('gif').text if item.find('gif') is not None else "default.gif"
+        alt = item.find('alt').text if item.find('alt') is not None else "N/A"
+        warning = item.find('warning').text if item.find('warning') is not None else "None"
+        next_cmd = item.find('next').text if item.find('next') is not None else "N/A"
         
-        # Highest priority: command starts with search term (exact match at start)
-        if cmd_lower.startswith(search_term):
-            score += 100
-        # Second priority: search term is in command (as a word)
-        elif search_term in cmd_lower:
-            score += 50
-        # Third priority: search term is in tags
-        elif search_term in tags_lower:
-            score += 30
-        # Fourth priority: search term is in description
-        elif search_term in desc_lower:
-            score += 10
-        
-        # Additional boost for exact tag match
-        if search_term in tags_lower.split(', '):
-            score += 20
+        # Check if search term matches
+        if search_term in tags.lower() or search_term in cmd.lower() or search_term in desc.lower():
+            score = 0
+            cmd_lower = cmd.lower()
+            desc_lower = desc.lower()
+            tags_lower = tags.lower()
             
-        matches.append({
-            "cmd": cmd,
-            "desc": desc,
-            "tags": tags,
-            "alt": alt,
-            "warning": warning,
-            "next": next_cmd,
-            "score": score
-        })
+            if cmd_lower.startswith(search_term):
+                score += 100
+            elif search_term in cmd_lower:
+                score += 50
+            elif search_term in tags_lower:
+                score += 30
+            elif search_term in desc_lower:
+                score += 10
+            
+            if search_term in tags_lower.split(', '):
+                score += 20
+                
+            matches.append({
+                "cmd": cmd,
+                "desc": desc,
+                "desc1": desc1,
+                "desc2": desc2,
+                "gif": gif_file,
+                "tags": tags,
+                "alt": alt,
+                "warning": warning,
+                "next": next_cmd,
+                "score": score
+            })
 
-# Sort matches by relevance score (highest first)
-matches.sort(key=lambda x: x["score"], reverse=True)
+    matches.sort(key=lambda x: x["score"], reverse=True)
+except Exception as parse_err:
+    show_error_dialog("Data Error", f"Error filtering XML commands:\n{parse_err}")
+    sys.exit(0)
 
 if not matches:
     sys.exit(0)
 
 root = tk.Tk()
-root.title(f"Git Command Selector — Keyword: '{search_term}'")
-root.geometry("680x440")
+root.title(f"Interactive Git Command Launcher — Keyword: '{search_term}'")
+root.geometry("960x600")
+root.configure(bg="#f0f2f5")
 root.attributes("-topmost", True)
 
-# Header & Shortcuts Hint
-lbl_header = tk.Label(root, text="Select Command (Up/Down to navigate | ENTER to run | ESC to cancel)", 
-                      font=("Segoe UI", 9, "bold"), fg="#2b579a")
-lbl_header.pack(anchor="w", padx=10, pady=(8, 2))
+# --- TOP AREA (SPLIT: LISTBOX LEFT | GIF PREVIEW RIGHT) ---
+top_frame = tk.Frame(root, bg="#f0f2f5")
+top_frame.pack(fill=tk.BOTH, expand=True, padx=12, pady=(10, 5))
 
-# Listbox with search result count
-listbox_frame = tk.Frame(root)
-listbox_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=2)
+left_container = tk.Frame(top_frame, bg="#f0f2f5")
+left_container.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 8))
 
-listbox = tk.Listbox(listbox_frame, font=("Segoe UI", 10), selectmode=tk.SINGLE, height=6)
-listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+lbl_header = tk.Label(left_container, text="Select Command (Up/Down to navigate | ENTER to run | ESC to cancel)", 
+                      font=("Segoe UI", 9, "bold"), fg="#2b579a", bg="#f0f2f5")
+lbl_header.pack(anchor="w", pady=(0, 4))
+
+listbox_frame = tk.Frame(left_container, bg="#ffffff", bd=1, relief=tk.SOLID)
+listbox_frame.pack(fill=tk.BOTH, expand=True)
+
+listbox = tk.Listbox(listbox_frame, font=("Segoe UI", 10), selectmode=tk.SINGLE, height=7, bd=0, highlightthickness=0)
+listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=2, pady=2)
 
 scrollbar = tk.Scrollbar(listbox_frame, orient=tk.VERTICAL, command=listbox.yview)
 scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 listbox.config(yscrollcommand=scrollbar.set)
 
-# Display matches with command prefix visible
 for m in matches:
-    # Extract command name from desc (format: "command : description")
-    display_text = m['desc']  # Already has "command : " prefix
+    display_text = m['desc']
     listbox.insert(tk.END, f"• {display_text}")
 
-# Show result count
-result_count = tk.Label(root, text=f"Found {len(matches)} matching command(s)", 
-                        font=("Segoe UI", 8, "italic"), fg="#666666")
-result_count.pack(anchor="w", padx=10, pady=(0, 2))
+result_count = tk.Label(left_container, text=f"Found {len(matches)} matching command(s)", 
+                        font=("Segoe UI", 8, "italic"), fg="#666666", bg="#f0f2f5")
+result_count.pack(anchor="w", pady=(4, 0))
 
-# Details Panel
-lbl_detail = tk.Label(root, text="Command Details & Guidance:", font=("Segoe UI", 9, "bold"))
-lbl_detail.pack(anchor="w", padx=10, pady=(5, 2))
+right_container = tk.Frame(top_frame, bg="#ffffff", bd=1, relief=tk.SOLID, width=350)
+right_container.pack(side=tk.RIGHT, fill=tk.Y, padx=(4, 0))
+right_container.pack_propagate(False)
 
-txt_preview = tk.Text(root, height=8, font=("Consolas", 9), bg="#f8f9fa", wrap="word")
-txt_preview.pack(fill=tk.BOTH, padx=10, pady=(0, 5))
+lbl_visual_header = tk.Label(right_container, text="Visual Command Diagram", 
+                             font=("Segoe UI", 9, "bold"), fg="#1e293b", bg="#e2e8f0")
+lbl_visual_header.pack(fill=tk.X, ipady=4)
 
-# Footer Hint for ESC key
-lbl_footer = tk.Label(root, text="Press [ESC] to exit without executing any command", 
-                      font=("Segoe UI", 8, "italic"), fg="#666666")
-lbl_footer.pack(anchor="e", padx=10, pady=(0, 8))
+lbl_gif_display = tk.Label(right_container, bg="#181c24")
+lbl_gif_display.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+
+current_gif_frames = []
+gif_animation_after_id = None
+current_frame_index = 0
+
+def stop_gif_animation():
+    global gif_animation_after_id
+    if gif_animation_after_id is not None:
+        try:
+            root.after_cancel(gif_animation_after_id)
+        except Exception:
+            pass
+        gif_animation_after_id = None
+
+def animate_gif():
+    global current_frame_index, gif_animation_after_id
+    if current_gif_frames:
+        try:
+            frame = current_gif_frames[current_frame_index]
+            lbl_gif_display.config(image=frame)
+            current_frame_index = (current_frame_index + 1) % len(current_gif_frames)
+            gif_animation_after_id = root.after(180, animate_gif)
+        except Exception:
+            stop_gif_animation()
+
+def load_and_play_gif(gif_filename):
+    global current_gif_frames, current_frame_index
+    stop_gif_animation()
+    current_gif_frames.clear()
+    current_frame_index = 0
+
+    gif_path = os.path.join(visuals_dir, gif_filename)
+    if not os.path.exists(gif_path):
+        gif_path = os.path.join(visuals_dir, "default.gif")
+
+    if os.path.exists(gif_path):
+        idx = 0
+        while True:
+            try:
+                frame = tk.PhotoImage(file=gif_path, format=f"gif -index {idx}")
+                current_gif_frames.append(frame)
+                idx += 1
+            except tk.TclError:
+                break
+            except Exception:
+                break
+    
+    if current_gif_frames:
+        animate_gif()
+    else:
+        lbl_gif_display.config(image='', text="[ No Visual Diagram Available ]", fg="#94a3b8", font=("Segoe UI", 9, "italic"))
+
+# --- BOTTOM AREA: DETAILS & GUIDANCE PANEL ---
+bottom_frame = tk.Frame(root, bg="#f0f2f5")
+bottom_frame.pack(fill=tk.BOTH, expand=True, padx=12, pady=(0, 8))
+
+lbl_detail = tk.Label(bottom_frame, text="Command Details & In-Depth Guidance:", font=("Segoe UI", 9, "bold"), fg="#1e293b", bg="#f0f2f5")
+lbl_detail.pack(anchor="w", pady=(2, 2))
+
+txt_preview = tk.Text(bottom_frame, height=10, font=("Consolas", 10), bg="#ffffff", fg="#0f172a", wrap="word", bd=1, relief=tk.SOLID)
+txt_preview.pack(fill=tk.BOTH, expand=True)
+
+txt_preview.tag_configure("header", font=("Consolas", 10, "bold"), foreground="#2563eb")
+txt_preview.tag_configure("cmd_text", font=("Consolas", 10, "bold"), foreground="#059669")
+txt_preview.tag_configure("warn_text", font=("Consolas", 10, "bold"), foreground="#dc2626")
+txt_preview.tag_configure("body_text", font=("Consolas", 10), foreground="#1e293b")
+txt_preview.tag_configure("sub_text", font=("Consolas", 10), foreground="#475569")
+
+lbl_footer = tk.Label(root, text="Press [ESC] to exit without executing | Use [Up/Down] arrows to explore", 
+                      font=("Segoe UI", 8, "italic"), fg="#64748b", bg="#f0f2f5")
+lbl_footer.pack(anchor="e", padx=12, pady=(0, 6))
 
 selected_command = [""]
 
 def custom_prompt(title, prompt_text, default_value=""):
-    """Custom wide/tall dialog box with optional default value."""
-    dialog = tk.Toplevel(root)
-    dialog.title(title)
-    dialog.geometry("550x220")
-    dialog.attributes("-topmost", True)
-    dialog.grab_set()
-    
-    user_input = [""]
-    
-    lbl = tk.Label(dialog, text=prompt_text, font=("Segoe UI", 10, "bold"))
-    lbl.pack(anchor="w", padx=15, pady=(15, 5))
-    
-    # Entry with optional default value
-    entry = tk.Text(dialog, height=4, font=("Consolas", 10), wrap="word", relief=tk.SOLID, bd=1)
-    entry.pack(fill=tk.BOTH, expand=True, padx=15, pady=5)
-    if default_value:
-        entry.insert("1.0", default_value)
-    entry.focus_set()
-    entry.tag_configure("center", justify='center')
-    
-    def on_ok(event=None):
-        val = entry.get("1.0", tk.END).strip()
-        if val:
-            user_input[0] = val
-        dialog.destroy()
+    """Custom wide modal input dialog."""
+    try:
+        dialog = tk.Toplevel(root)
+        dialog.title(title)
+        dialog.geometry("560x230")
+        dialog.configure(bg="#f8fafc")
+        dialog.attributes("-topmost", True)
+        dialog.grab_set()
         
-    def on_cancel(event=None):
-        dialog.destroy()
+        user_input = [""]
         
-    btn_frame = tk.Frame(dialog)
-    btn_frame.pack(anchor="e", padx=15, pady=(5, 15))
-    
-    btn_ok = tk.Button(btn_frame, text=" OK ", font=("Segoe UI", 9), width=10, command=on_ok)
-    btn_ok.pack(side=tk.LEFT, padx=5)
-    
-    btn_cancel = tk.Button(btn_frame, text="Cancel", font=("Segoe UI", 9), width=10, command=on_cancel)
-    btn_cancel.pack(side=tk.LEFT, padx=5)
-    
-    # Keybindings for dialog
-    dialog.bind("<Control-Return>", on_ok)
-    dialog.bind("<Escape>", on_cancel)
-    
-    root.wait_window(dialog)
-    return user_input[0]
+        lbl = tk.Label(dialog, text=prompt_text, font=("Segoe UI", 10, "bold"), fg="#0f172a", bg="#f8fafc")
+        lbl.pack(anchor="w", padx=15, pady=(15, 5))
+        
+        entry = tk.Text(dialog, height=4, font=("Consolas", 10), wrap="word", relief=tk.SOLID, bd=1)
+        entry.pack(fill=tk.BOTH, expand=True, padx=15, pady=5)
+        if default_value:
+            entry.insert("1.0", default_value)
+        entry.focus_set()
+        
+        def on_ok(event=None):
+            val = entry.get("1.0", tk.END).strip()
+            if val:
+                user_input[0] = val
+            dialog.destroy()
+            
+        def on_cancel(event=None):
+            dialog.destroy()
+            
+        btn_frame = tk.Frame(dialog, bg="#f8fafc")
+        btn_frame.pack(anchor="e", padx=15, pady=(5, 15))
+        
+        btn_ok = tk.Button(btn_frame, text=" OK ", font=("Segoe UI", 9, "bold"), bg="#2563eb", fg="#ffffff", width=10, command=on_ok, relief=tk.FLAT)
+        btn_ok.pack(side=tk.LEFT, padx=5)
+        
+        btn_cancel = tk.Button(btn_frame, text="Cancel", font=("Segoe UI", 9), bg="#e2e8f0", fg="#334155", width=10, command=on_cancel, relief=tk.FLAT)
+        btn_cancel.pack(side=tk.LEFT, padx=5)
+        
+        dialog.bind("<Control-Return>", on_ok)
+        dialog.bind("<Escape>", on_cancel)
+        
+        root.wait_window(dialog)
+        return user_input[0]
+    except Exception as err:
+        show_error_dialog("Dialog Error", f"Input prompt error: {err}")
+        return ""
 
 def get_placeholder_prompt(cmd, placeholder):
-    """Return appropriate prompt based on placeholder type."""
     prompts = {
-        'commitmsg': {
-            'title': 'Commit Message',
-            'prompt': 'Enter commit message (Press Ctrl+ENTER or OK to submit):\n\nTip: Use present tense, be descriptive',
-            'default': 'feat: Add new feature'
-        },
-        'branchname': {
-            'title': 'Branch Name',
-            'prompt': 'Enter branch name (Press Ctrl+ENTER or OK to submit):\n\nTip: Use descriptive names like feature/login-page',
-            'default': 'feature/new-feature'
-        },
-        'filename': {
-            'title': 'File Name',
-            'prompt': 'Enter file name/path (Press Ctrl+ENTER or OK to submit):\n\nTip: Use relative path like src/index.html',
-            'default': 'file.txt'
-        },
-        'commithash': {
-            'title': 'Commit Hash',
-            'prompt': 'Enter commit hash (Press Ctrl+ENTER or OK to submit):\n\nTip: Use full or short hash like a1b2c3d',
-            'default': 'a1b2c3d'
-        },
-        'repourl': {
-            'title': 'Repository URL',
-            'prompt': 'Enter repository URL (Press Ctrl+ENTER or OK to submit):\n\nTip: Format: https://github.com/username/repo.git',
-            'default': 'https://github.com/username/repo.git'
-        },
-        'username': {
-            'title': 'Git Username',
-            'prompt': 'Enter your Git username (Press Ctrl+ENTER or OK to submit):\n\nTip: Use your full name or GitHub username',
-            'default': 'Your Name'
-        },
-        'useremail': {
-            'title': 'Git Email',
-            'prompt': 'Enter your Git email (Press Ctrl+ENTER or OK to submit):\n\nTip: Use the email associated with your GitHub account',
-            'default': 'your.email@example.com'
-        },
-        'editor': {
-            'title': 'Text Editor',
-            'prompt': 'Enter editor command (Press Ctrl+ENTER or OK to submit):\n\nTip: Use "code --wait" for VS Code, "vim" for Vim',
-            'default': 'code --wait'
-        },
-        'tagname': {
-            'title': 'Tag Name',
-            'prompt': 'Enter tag name (Press Ctrl+ENTER or OK to submit):\n\nTip: Use version like v1.0.0',
-            'default': 'v1.0.0'
-        },
-        'tagmsg': {
-            'title': 'Tag Message',
-            'prompt': 'Enter tag message (Press Ctrl+ENTER or OK to submit):\n\nTip: Describe the release or version',
-            'default': 'Release version 1.0.0'
-        },
-        'stashmsg': {
-            'title': 'Stash Message',
-            'prompt': 'Enter stash message (Press Ctrl+ENTER or OK to submit):\n\nTip: Describe what you\'re stashing',
-            'default': 'WIP: Work in progress'
-        },
-        'number': {
-            'title': 'Number',
-            'prompt': 'Enter number (Press Ctrl+ENTER or OK to submit):\n\nTip: Enter a numeric value',
-            'default': '5'
-        },
-        'branch1': {
-            'title': 'First Branch',
-            'prompt': 'Enter first branch name (Press Ctrl+ENTER or OK to submit):\n\nTip: Usually the base branch',
-            'default': 'main'
-        },
-        'branch2': {
-            'title': 'Second Branch',
-            'prompt': 'Enter second branch name (Press Ctrl+ENTER or OK to submit):\n\nTip: Usually the feature branch',
-            'default': 'develop'
-        },
-        'repodir': {
-            'title': 'Directory Name',
-            'prompt': 'Enter directory name (Press Ctrl+ENTER or OK to submit):\n\nTip: Repository folder name after cloning',
-            'default': 'project-name'
-        }
+        'commitmsg': ('Commit Message', 'Enter descriptive commit message (Ctrl+ENTER to submit):', 'feat: Add new feature'),
+        'branchname': ('Branch Name', 'Enter branch name (Ctrl+ENTER to submit):', 'feature/new-feature'),
+        'filename': ('File Name', 'Enter file path (Ctrl+ENTER to submit):', 'index.html'),
+        'commithash': ('Commit Hash', 'Enter target commit hash (Ctrl+ENTER to submit):', 'a1b2c3d'),
+        'repourl': ('Repository URL', 'Enter Git repository URL (Ctrl+ENTER to submit):', 'https://github.com/username/repo.git'),
+        'username': ('Git Username', 'Enter Git username (Ctrl+ENTER to submit):', 'Your Name'),
+        'useremail': ('Git Email', 'Enter Git email address (Ctrl+ENTER to submit):', 'your.email@example.com'),
+        'editor': ('Text Editor', 'Enter core editor command (Ctrl+ENTER to submit):', 'code --wait'),
+        'tagname': ('Tag Name', 'Enter release tag name (Ctrl+ENTER to submit):', 'v1.0.0'),
+        'tagmsg': ('Tag Message', 'Enter tag message (Ctrl+ENTER to submit):', 'Release version 1.0.0'),
+        'stashmsg': ('Stash Message', 'Enter stash label message (Ctrl+ENTER to submit):', 'WIP: Work in progress'),
+        'number': ('Number', 'Enter numeric value (Ctrl+ENTER to submit):', '5'),
+        'branch1': ('First Branch', 'Enter base branch (Ctrl+ENTER to submit):', 'main'),
+        'branch2': ('Second Branch', 'Enter feature branch (Ctrl+ENTER to submit):', 'develop'),
+        'repodir': ('Directory Name', 'Enter target directory path (Ctrl+ENTER to submit):', 'project-folder')
     }
-    
-    # Map placeholder to prompt config
-    placeholder_map = {
-        'commitmsg': prompts['commitmsg'],
-        'branchname': prompts['branchname'],
-        'filename': prompts['filename'],
-        'commithash': prompts['commithash'],
-        'repourl': prompts['repourl'],
-        'username': prompts['username'],
-        'useremail': prompts['useremail'],
-        'editor': prompts['editor'],
-        'tagname': prompts['tagname'],
-        'tagmsg': prompts['tagmsg'],
-        'stashmsg': prompts['stashmsg'],
-        'number': prompts['number'],
-        'branch1': prompts['branch1'],
-        'branch2': prompts['branch2'],
-        'repodir': prompts['repodir']
-    }
-    
-    prompt_config = placeholder_map.get(placeholder, {
-        'title': 'Input Required',
-        'prompt': f'Enter value for {placeholder} (Press Ctrl+ENTER or OK to submit):',
-        'default': ''
-    })
-    
-    return prompt_config['title'], prompt_config['prompt'], prompt_config['default']
+    return prompts.get(placeholder, ('Input Required', f'Enter value for <{placeholder}>:', ''))
 
 def update_preview(event=None):
-    if event and event.keysym in ("Up", "Down"):
-        curr_idx = listbox.curselection()[0] if listbox.curselection() else 0
-        if event.keysym == "Up" and curr_idx > 0:
-            curr_idx -= 1
-        elif event.keysym == "Down" and curr_idx < listbox.size() - 1:
-            curr_idx += 1
-        listbox.selection_clear(0, tk.END)
-        listbox.selection_set(curr_idx)
-        listbox.see(curr_idx)
+    try:
+        if event and event.keysym in ("Up", "Down"):
+            curr_idx = listbox.curselection()[0] if listbox.curselection() else 0
+            if event.keysym == "Up" and curr_idx > 0:
+                curr_idx -= 1
+            elif event.keysym == "Down" and curr_idx < listbox.size() - 1:
+                curr_idx += 1
+            listbox.selection_clear(0, tk.END)
+            listbox.selection_set(curr_idx)
+            listbox.see(curr_idx)
 
-    selection = listbox.curselection()
-    if selection:
-        idx = selection[0]
-        m = matches[idx]
-        
-        info_text = (
-            f"COMMAND  : {m['cmd']}\n"
-            f"ALT HINT : {m['alt']}\n"
-            f"WARNING  : {m['warning']}\n"
-            f"NEXT STEP: {m['next']}\n"
-            f"TAGS     : {m['tags']}\n"
-            f"SCORE    : {m['score']} (relevance)"
-        )
-        
-        txt_preview.config(state=tk.NORMAL)
-        txt_preview.delete("1.0", tk.END)
-        txt_preview.insert(tk.END, info_text)
-        txt_preview.config(state=tk.DISABLED)
+        selection = listbox.curselection()
+        if selection:
+            idx = selection[0]
+            m = matches[idx]
+            
+            load_and_play_gif(m['gif'])
+            
+            txt_preview.config(state=tk.NORMAL)
+            txt_preview.delete("1.0", tk.END)
+            
+            txt_preview.insert(tk.END, "COMMAND        : ", "header")
+            txt_preview.insert(tk.END, f"{m['cmd']}\n", "cmd_text")
+            
+            txt_preview.insert(tk.END, "HOW IT WORKS   : ", "header")
+            txt_preview.insert(tk.END, f"{m['desc1']}\n", "body_text")
+            
+            txt_preview.insert(tk.END, "USE CASES & TIPS: ", "header")
+            txt_preview.insert(tk.END, f"{m['desc2']}\n", "body_text")
+            
+            txt_preview.insert(tk.END, "ALTERNATIVE HINT: ", "header")
+            txt_preview.insert(tk.END, f"{m['alt']}\n", "sub_text")
+            
+            txt_preview.insert(tk.END, "WARNING/SAFETY : ", "header")
+            warn_style = "warn_text" if "DANGER" in m['warning'] or "CAUTION" in m['warning'] or "RISKY" in m['warning'] else "sub_text"
+            txt_preview.insert(tk.END, f"{m['warning']}\n", warn_style)
+            
+            txt_preview.insert(tk.END, "RECOMMENDED NEXT: ", "header")
+            txt_preview.insert(tk.END, f"{m['next']}\n", "cmd_text")
+            
+            txt_preview.insert(tk.END, "TAGS & SEARCH  : ", "header")
+            txt_preview.insert(tk.END, f"{m['tags']} (Score: {m['score']})", "sub_text")
+            
+            txt_preview.config(state=tk.DISABLED)
+    except Exception as err:
+        print(f"Preview update error: {err}")
 
 def confirm_selection(event=None):
-    selection = listbox.curselection()
-    if selection:
-        cmd = matches[selection[0]]['cmd']
-        
-        # Dictionary to store all placeholder replacements
-        replacements = {}
-        
-        # Find all placeholders in the command
-        import re
-        placeholders = re.findall(r'<([^>]+)>', cmd)
-        
-        if placeholders:
-            # Process each placeholder
-            for placeholder in placeholders:
-                # Get the appropriate prompt for this placeholder
-                title, prompt_text, default_value = get_placeholder_prompt(cmd, placeholder)
-                
-                # Show the prompt dialog
-                value = custom_prompt(title, prompt_text, default_value)
-                if value:
-                    replacements[placeholder] = value
-                else:
-                    # User cancelled
-                    return
+    try:
+        selection = listbox.curselection()
+        if selection:
+            cmd = matches[selection[0]]['cmd']
+            replacements = {}
+            placeholders = re.findall(r'<([^>]+)>', cmd)
             
-            # Apply all replacements
-            for placeholder, value in replacements.items():
-                cmd = cmd.replace(f'<{placeholder}>', value)
-        
-        selected_command[0] = cmd
-    root.destroy()
+            if placeholders:
+                for placeholder in placeholders:
+                    title, prompt_text, default_value = get_placeholder_prompt(cmd, placeholder)
+                    value = custom_prompt(title, prompt_text, default_value)
+                    if value:
+                        replacements[placeholder] = value
+                    else:
+                        return
+                
+                for placeholder, value in replacements.items():
+                    cmd = cmd.replace(f'<{placeholder}>', value)
+            
+            selected_command[0] = cmd
+        stop_gif_animation()
+        root.destroy()
+    except Exception as err:
+        show_error_dialog("Selection Error", f"Error confirming command selection: {err}")
 
 def cancel_selection(event=None):
     selected_command[0] = ""
+    stop_gif_animation()
     root.destroy()
 
-# Key & Event Bindings
 listbox.bind("<<ListboxSelect>>", update_preview)
 listbox.bind("<KeyRelease-Up>", update_preview)
 listbox.bind("<KeyRelease-Down>", update_preview)
@@ -339,17 +405,18 @@ listbox.bind("<Return>", confirm_selection)
 listbox.bind("<Double-Button-1>", confirm_selection)
 root.bind("<Escape>", cancel_selection)
 
-# Initial setup - select first item (most relevant due to sorting)
 listbox.selection_set(0)
 listbox.focus_set()
 update_preview()
 
 root.mainloop()
 
-# Save selected command to text file for NppExec
 out_file = os.path.join(script_dir, "selected_cmd.txt")
-with open(out_file, "w", encoding="utf-8") as f:
-    if selected_command[0]:
-        f.write(f'set SELECTED_CMD = {selected_command[0]}\n')
-    else:
-        f.write('unset SELECTED_CMD\n')
+try:
+    with open(out_file, "w", encoding="utf-8") as f:
+        if selected_command[0]:
+            f.write(f'set SELECTED_CMD = {selected_command[0]}\n')
+        else:
+            f.write('unset SELECTED_CMD\n')
+except Exception as err:
+    show_error_dialog("File Save Error", f"Failed to save selected_cmd.txt:\n{err}")
