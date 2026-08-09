@@ -21,12 +21,11 @@ missing_gifs = not os.path.exists(visuals_dir) or any(
     not os.path.exists(os.path.join(visuals_dir, g)) for g in required_gifs
 )
 
-if missing_gifs:
-    try:
-        from generate_visuals import create_visuals
-        create_visuals()
-    except Exception as e:
-        print(f"Notice: Visual generation warning: {e}")
+try:
+    from generate_visuals import create_visuals
+    create_visuals()
+except Exception as e:
+    print(f"Notice: Visual generation warning: {e}")
 
 search_term = sys.argv[1].lower().strip() if len(sys.argv) > 1 else ""
 
@@ -198,7 +197,7 @@ def animate_gif():
             frame = current_gif_frames[current_frame_index]
             lbl_gif_display.config(image=frame)
             current_frame_index = (current_frame_index + 1) % len(current_gif_frames)
-            gif_animation_after_id = root.after(180, animate_gif)
+            gif_animation_after_id = root.after(450, animate_gif)
         except Exception:
             stop_gif_animation()
 
